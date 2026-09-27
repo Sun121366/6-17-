@@ -1,0 +1,23 @@
+{% load i18n %}
+{% load static %}
+<div class="widget-login flex items-center gap-3 flex-wrap">
+    {% if apps %}
+        <small class="text-sm text-muted-foreground">
+            {% trans 'quick login' %}:
+        </small>
+        <div class="flex gap-2 flex-wrap">
+            {% for icon,url in apps %}
+                <a href="{{ url }}"
+                   rel="nofollow"
+                   hx-boost="false"
+                   class="inline-flex items-center justify-center size-10 rounded-lg border border-border hover:border-primary/30 transition-colors bg-card hover:bg-secondary"
+                   title="使用 {{ icon }} 登录">
+                    <span class="icon-sn-{{ icon }}"></span>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<link rel="stylesheet" href="{% static 'blog/css/oauth_style.css' %}" media="print" onload="this.media='all'; this.onload=null;">
+<noscript><link rel="stylesheet" href="{% static 'blog/css/oauth_style.css' %}"></noscript>

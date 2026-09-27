@@ -1,0 +1,68 @@
+{% extends 'share_layout/base.html' %}
+{% load blog_tags %}
+{% load cache %}
+{% load i18n %}
+{% block header %}
+    {% if tag_name %}
+        {% if statuscode == '404' %}
+            <title>404 NotFound</title>
+        {% elif statuscode == '403' %}
+            <title>Permission Denied</title>
+        {% elif statuscode == '500' %}
+            <title>500 Error</title>
+        {% else %}
+            <title></title>
+        {% endif %}
+    {% else %}
+        <title>{{ SITE_NAME }} | {{ SITE_DESCRIPTION }}</title>
+    {% endif %}
+    <meta name="description" content="{{ SITE_SEO_DESCRIPTION }}"/>
+    <meta name="keywords" content="{{ SITE_KEYWORDS }}"/>
+    <meta property="og:type" content="blog"/>
+    <meta property="og:title" content="{{ SITE_NAME }}"/>
+    <meta property="og:description" content="{{ SITE_DESCRIPTION }}"/>
+    <meta property="og:url" content="{{ SITE_BASE_URL }}"/>
+    <meta property="og:site_name" content="{{ SITE_NAME }}"/>
+{% endblock %}
+{% block content %}
+    <div class="mx-auto max-w-6xl px-4 py-4 lg:px-6 lg:py-6">
+        <div class="grid gap-6 lg:grid-cols-[1fr_300px]">
+            <main>
+                <div class="flex items-center justify-center min-h-[60vh]">
+                    <div class="text-center px-4">
+                        {# Error code #}
+                        {% if statuscode %}
+                            <div class="text-7xl md:text-9xl font-bold text-muted-foreground/20 mb-2">
+                                {{ statuscode }}
+                            </div>
+                        {% endif %}
+
+                        {# Error message #}
+                        <h1 class="text-xl font-bold text-foreground mb-2">
+                            {{ message }}
+                        </h1>
+
+                        {# Action buttons - unified style #}
+                        <div class="flex flex-wrap items-center justify-center gap-3 mt-8">
+                            <a href="/"
+                               class="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90">
+                                {% trans 'Home Page' %}
+                            </a>
+                            <a href="javascript:history.back()"
+                               class="rounded-lg border border-border px-5 py-2 text-sm font-medium text-foreground transition-colors hover:text-primary">
+                                {% trans 'Go back' %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            {# Sidebar #}
+            <div class="hidden lg:block">
+                <div class="sticky top-20">
+                    {% load_sidebar user 'i' %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

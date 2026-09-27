@@ -1,0 +1,19 @@
+{% load i18n %}
+{% if article_tags_list %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            {% trans 'tags' %}
+        </div>
+        <div class="panel-body">
+
+            {% for url,count,tag,color in article_tags_list %}
+                <a class="label label-{{ color }} inline-block" href="{{ url }}"
+                   title="{{ tag.name }}">
+                    {{ tag.name }}
+                    <span class="badge">{{ count }}</span>
+                </a>
+            {% endfor %}
+
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,279 @@
+{% load static %}
+{% load cache %}
+{% load i18n %}
+{% load compress %}
+{% load vite_tags %}
+<!DOCTYPE html>
+<html lang="zh-CN" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+<head>
+    {% load blog_tags %}
+
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="theme-color" content="#a855f7" media="(prefers-color-scheme: light)"/>
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)"/>
+    <meta name="robots" content="index, follow"/>
+    {% head_meta %}
+    {% block header %}
+        <!-- SEO插件会自动生成title、description、keywords等标签 -->
+    {% endblock %}
+    <link rel="profile" href="http://gmpg.org/xfn/11"/>
+
+    <!-- 防闪烁脚本：必须在CSS加载前立即执行 -->
+    <script>
+        (function() {
+            const STORAGE_KEY = 'dark-mode-enabled';
+            const THEME_ATTR = 'data-theme';
+            const ENABLE_SYSTEM = true;
+
+            function getPreferredTheme() {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved !== null) return saved === 'dark' ? 'dark' : 'light';
+                if (ENABLE_SYSTEM && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                }
+                return 'light';
+            }
+
+            function applyTheme(theme) {
+                const isDark = theme === 'dark';
+                if (isDark) {
+                    document.documentElement.setAttribute(THEME_ATTR, 'dark');
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.removeAttribute(THEME_ATTR);
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+
+            // 立即应用主题到html元素（防止闪烁）
+            const theme = getPreferredTheme();
+            applyTheme(theme);
+
+            // 存储主题供后续使用
+            window.__THEME__ = theme;
+
+            // 全局主题管理器，供导航栏等组件调用
+            window.themeManager = {
+                toggle: function() {
+                    var current = document.documentElement.getAttribute(THEME_ATTR) === 'dark' ? 'dark' : 'light';
+                    var next = current === 'dark' ? 'light' : 'dark';
+                    applyTheme(next);
+                    localStorage.setItem(STORAGE_KEY, next);
+                    window.__THEME__ = next;
+                }
+            };
+        })();
+    </script>
+
+    <!-- 资源提示优化 -->
+    <!-- 仅保留真正需要的 dns-prefetch，MathJax 由智能加载器按需加载 -->
+    <link rel="dns-prefetch" href="//cdn.mathjax.org"/>
+
+    <!-- RSS和图标 -->
+    <link rel="alternate" type="application/rss+xml" title="{{ SITE_NAME }} &raquo; Feed" href="/feed"/>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+    <link rel="apple-touch-icon" href="/favicon.ico"/>
+
+    <!-- 关键CSS：防止深色模式闪烁 + 首屏优化（bootstrap 样式，Tailwind 加载前生效，颜色值与 design system 一致） -->
+    <style>
+        :root {
+            /* bootstrap token：与 main.css 的 --background/--foreground 保持同值 */
+            --bootstrap-bg-light: 249 250 251;
+            --bootstrap-fg-light: 17 24 39;
+            --bootstrap-bg-dark: 15 23 42;
+            --bootstrap-fg-dark: 226 232 240;
+            --bootstrap-skeleton-base: 243 244 246;
+            --bootstrap-skeleton-high: 229 231 235;
+        }
+
+        html[data-theme="dark"],
+        html[data-theme="dark"] body {
+            background-color: rgb(var(--bootstrap-bg-dark)) !important;
+            color: rgb(var(--bootstrap-fg-dark)) !important;
+        }
+
+        html:not([data-theme="dark"]),
+        html:not([data-theme="dark"]) body {
+            background-color: rgb(var(--bootstrap-bg-light)) !important;
+            color: rgb(var(--bootstrap-fg-light)) !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        #page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #masthead {
+            position: relative;
+            z-index: 999;
+        }
+
+        #main {
+            flex: 1;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg,
+                rgb(var(--bootstrap-skeleton-base)) 25%,
+                rgb(var(--bootstrap-skeleton-high)) 50%,
+                rgb(var(--bootstrap-skeleton-base)) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+
+    <!-- 字体优化加载：使用媒体查询延迟非关键字体 -->
+    <link rel="stylesheet" href="{% static 'blog/fonts/open-sans.css' %}" media="print" onload="this.media='all'; this.onload=null;">
+    <noscript><link rel="stylesheet" href="{% static 'blog/fonts/open-sans.css' %}"></noscript>
+
+    <!-- 代码高亮样式（Pygments） - 异步加载，仅在有代码块时需要 -->
+    <link rel="stylesheet" href="{% static 'pygments/default.css' %}" media="print" onload="this.media='all'; this.onload=null;">
+    <noscript><link rel="stylesheet" href="{% static 'pygments/default.css' %}"></noscript>
+
+    <!-- 新前端：Tailwind CSS + Alpine.js - 完整样式系统（通过JS加载） -->
+    {% vite_js 'src/main.js' %}
+
+    <!-- 插件CSS文件 -->
+    {% compress css %}
+        {% block compress_css %}
+        {% endblock %}
+        {% plugin_compressed_css %}
+    {% endcompress %}
+
+    {% if GLOBAL_HEADER %}
+        {{ GLOBAL_HEADER|safe }}
+    {% endif %}
+
+    {% if ANALYTICS_CODE %}
+        {{ ANALYTICS_CODE|safe }}
+    {% endif %}
+
+</head>
+
+<body data-color-scheme="{{ COLOR_SCHEME|default:'purple' }}"
+      data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
+      x-data="{ searchOpen: false }">
+<div id="page" class="hfeed site flex min-h-screen flex-col">
+    {% load i18n %}
+    {% include 'share_layout/nav.html' %}
+    <div id="main" role="main" class="flex-1" hx-boost="true" hx-target="#main" hx-select="#main" hx-swap="innerHTML" hx-push-url="true">
+
+        {% block content %}
+        {% endblock %}
+
+
+        {% block sidebar %}
+        {% endblock %}
+
+
+    </div><!-- #main .wrapper -->
+    {% include 'share_layout/footer.html' %}
+</div><!-- #page -->
+
+<!-- JS已在head中加载，无需重复 -->
+
+<!-- 插件JS文件 -->
+{% compress js %}
+    {% block compress_js %}
+    {% endblock %}
+    {% plugin_compressed_js %}
+{% endcompress %}
+
+<!-- MathJax智能加载器 - 延迟加载,不阻塞渲染 -->
+<script src="{% static 'blog/js/mathjax-loader.js' %}" defer></script>
+
+{% block footer %}
+{% endblock %}
+
+<!-- 回到顶部按钮 - Alpine.js组件 -->
+<button x-data="backToTop()"
+     x-init="init()"
+     @click="scrollToTop()"
+     id="rocket"
+     x-show="isVisible"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 scale-90"
+     x-transition:enter-end="opacity-100 scale-100"
+     x-cloak
+     aria-label="{% trans 'Back to top' %}">
+    <svg class="w-6 h-6 fill-current text-white" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+    </svg>
+</button>
+
+<!-- 图片灯箱 - Alpine.js组件 -->
+<div x-data="imageLightbox()"
+     x-init="init()"
+     @keydown.escape.window="closeLightbox()"
+     x-cloak
+     role="dialog"
+     aria-modal="true"
+     :aria-hidden="!showLightbox"
+     aria-label="{% trans 'Image preview' %}">
+    <!-- 遮罩层 -->
+    <div x-show="showLightbox"
+         x-trap="showLightbox"
+         @click="closeLightbox()"
+         class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+    </div>
+
+    <!-- 图片容器 -->
+    <div x-show="showLightbox"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95">
+        <div class="relative max-w-[90vw] max-h-full" @click.stop>
+            <img :src="currentImage"
+                 :alt="currentAlt"
+                 class="max-w-full max-h-[85vh] sm:max-h-[90vh] object-contain rounded-lg shadow-2xl">
+
+            <!-- 图片说明 -->
+            <div x-show="currentAlt"
+                 class="absolute bottom-0 left-0 right-0 bg-black/75 text-white text-center py-3 px-4 rounded-b-lg max-w-full">
+                <p class="text-sm break-words" x-text="currentAlt"></p>
+            </div>
+
+            <!-- 关闭按钮 -->
+            <button @click="closeLightbox()"
+                    aria-label="{% trans 'Close' %}"
+                    class="absolute top-2 right-2 inline-flex size-9 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white/50">
+                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

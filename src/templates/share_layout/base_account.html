@@ -1,0 +1,81 @@
+{% load static %}
+{% load i18n %}
+{% load compress %}
+{% load vite_tags %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>{{ SITE_NAME }} | {% block page_title %}Account{% endblock %}</title>
+    <link rel="icon" href="/favicon.ico">
+
+    <!-- 防闪烁脚本：必须在CSS加载前立即执行 -->
+    <script>
+        (function() {
+            const STORAGE_KEY = 'dark-mode-enabled';
+            const THEME_ATTR = 'data-theme';
+            const ENABLE_SYSTEM = true;
+
+            function getPreferredTheme() {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved !== null) return saved === 'dark' ? 'dark' : 'light';
+                if (ENABLE_SYSTEM && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                }
+                return 'light';
+            }
+
+            function applyTheme(theme) {
+                if (theme === 'dark') {
+                    document.documentElement.setAttribute(THEME_ATTR, 'dark');
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.removeAttribute(THEME_ATTR);
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+
+            applyTheme(getPreferredTheme());
+            window.__THEME__ = getPreferredTheme();
+        })();
+    </script>
+
+    <!-- 新前端：Tailwind CSS + Alpine.js + HTMX（通过Vite构建） -->
+    {% vite_js 'src/main.js' %}
+
+    <!-- 插件CSS文件 -->
+    {% compress css %}
+        {% block compress_css %}{% endblock %}
+    {% endcompress %}
+
+    <style>
+        .account-bg {
+            background-image:
+                radial-gradient(at 20% 20%, rgb(var(--color-primary-500) / 0.06) 0%, transparent 50%),
+                radial-gradient(at 80% 80%, rgb(var(--color-primary-400) / 0.04) 0%, transparent 50%);
+        }
+        [data-theme="dark"] .account-bg,
+        .dark .account-bg {
+            background-image:
+                radial-gradient(at 20% 20%, rgb(var(--color-primary-500) / 0.08) 0%, transparent 50%),
+                radial-gradient(at 80% 80%, rgb(var(--color-primary-400) / 0.05) 0%, transparent 50%);
+        }
+    </style>
+</head>
+
+<body class="account-bg min-h-screen flex items-center justify-center p-4 bg-background" x-data="{ showPassword: false }">
+    {% block content %}{% endblock %}
+
+    {# Theme toggle button #}
+    <button class="fixed top-4 right-4 size-9 flex items-center justify-center rounded-lg border border-border bg-card/80 backdrop-blur-sm text-muted-foreground shadow-sm transition-colors hover:bg-secondary hover:text-foreground"
+            @click="window.themeManager && window.themeManager.toggle()"
+            aria-label="切换主题">
+        <svg class="size-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+    </button>
+</body>
+</html>

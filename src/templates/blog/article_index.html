@@ -1,0 +1,81 @@
+{% extends 'share_layout/base.html' %}
+{% load blog_tags %}
+{% load i18n %}
+
+{% block header %}
+    <title>{{ SITE_NAME }}</title>
+    <meta name="description" content="{{ SITE_DESCRIPTION }}"/>
+    <meta name="keywords" content="{{ SITE_KEYWORDS }}"/>
+{% endblock %}
+
+{% block content %}
+    <div class="mx-auto max-w-6xl px-4 py-4 lg:px-6 lg:py-6">
+        {# Main Grid #}
+        <div class="grid gap-6 lg:grid-cols-[1fr_300px]">
+            {# Main Content #}
+            <main>
+                {# Title Section #}
+                <div class="mb-6">
+                    {% if page_type == "分类目录归档" %}
+                        <p class="mb-1 text-xs text-muted-foreground">分类</p>
+                        <h2 class="flex items-center gap-2 text-xl font-bold text-foreground m-0">
+                            <span class="h-5 w-1 shrink-0 rounded-full bg-primary"></span>
+                            {{ tag_name }}
+                        </h2>
+                    {% elif page_type == "分类标签归档" %}
+                        <p class="mb-1 text-xs text-muted-foreground">标签</p>
+                        <h2 class="flex items-center gap-2 text-xl font-bold text-foreground m-0">
+                            <span class="h-5 w-1 shrink-0 rounded-full bg-primary"></span>
+                            {{ tag_name }}
+                        </h2>
+                    {% elif page_type == "作者文章归档" %}
+                        <p class="mb-1 text-xs text-muted-foreground">作者</p>
+                        <h2 class="flex items-center gap-2 text-xl font-bold text-foreground m-0">
+                            <span class="h-5 w-1 shrink-0 rounded-full bg-primary"></span>
+                            {{ tag_name }}
+                        </h2>
+                    {% else %}
+                        <h2 class="flex items-center gap-2 text-xl font-bold text-foreground m-0">
+                            <span class="h-5 w-1 shrink-0 rounded-full bg-primary"></span>
+                            {% trans 'recent articles' %}
+                        </h2>
+                    {% endif %}
+                </div>
+
+                {# Article List #}
+                <div class="flex flex-col gap-5">
+                    {% for article in article_list %}
+                        {% load_article_detail article True user %}
+                    {% endfor %}
+                </div>
+
+                {# Pagination #}
+                {% if is_paginated %}
+                    {% load_pagination_info page_obj page_type tag_name %}
+                {% endif %}
+            </main>
+
+            {# Sidebar - Desktop: fixed right column #}
+            <div class="hidden lg:block">
+                <div class="sticky top-20">
+                    {% load_sidebar user "p" %}
+                </div>
+            </div>
+        </div>
+
+        {# Mobile Sidebar - collapsible accordion on small screens #}
+        <div class="mt-8 lg:hidden">
+            <details class="rounded-xl border border-border bg-card group">
+                <summary class="flex cursor-pointer items-center justify-between p-4 text-sm font-medium text-muted-foreground list-none [&::-webkit-details-marker]:hidden">
+                    <span>发现更多</span>
+                    <svg class="size-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </summary>
+                <div class="border-t border-border p-4">
+                    {% load_sidebar user "p" %}
+                </div>
+            </details>
+        </div>
+    </div>
+{% endblock %}

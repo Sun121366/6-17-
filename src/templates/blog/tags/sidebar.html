@@ -1,0 +1,200 @@
+{% load blog_tags %}
+{% load i18n %}
+
+<aside class="flex flex-col gap-4">
+    {# 公告（Extra Sidebars）— 第一 #}
+    {% if extra_sidebars %}
+        {% for sidebar in extra_sidebars %}
+            <div class="rounded-xl border border-border bg-card p-5 shadow-sm">
+                <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
+                    <svg class="size-4 shrink-0 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                    </svg>
+                    {{ sidebar.name }}
+                </h3>
+                <div class="prose prose-sm max-w-none">
+                    {{ sidebar.content|sidebar_markdown|safe }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {# Hot Posts — 第二 #}
+    {% if most_read_articles %}
+    <div class="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
+            <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+            热门文章
+        </h3>
+        <ul class="m-0 flex flex-col gap-3 p-0 list-none">
+            {% for a in most_read_articles %}
+                <li class="flex gap-3">
+                    <span class="flex size-5 shrink-0 items-center justify-center rounded text-[11px] font-semibold {% if forloop.counter <= 3 %}text-primary{% else %}text-muted-foreground{% endif %}">
+                        {{ forloop.counter }}
+                    </span>
+                    <a href="{{ a.get_absolute_url }}" class="group flex min-w-0 flex-col gap-1">
+                        <span class="line-clamp-2 text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
+                            {{ a.title }}
+                        </span>
+                        <span class="text-[11px] text-muted-foreground">
+                            {{ a.views }} {% trans 'views' %}
+                        </span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {# Recent Comments — 第三 #}
+    {% if sidebar_comments and open_site_comment %}
+    <div class="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
+            <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            {% trans 'recent comments' %}
+        </h3>
+        <ul class="m-0 flex flex-col gap-2 p-0 list-none">
+            {% for c in sidebar_comments %}
+                <li>
+                    <a href="{{ c.article.get_absolute_url }}#comment-{{ c.pk }}"
+                       class="-mx-2 group flex items-start gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/50">
+                        <img src="{{ c.author.email|gravatar_url:32 }}"
+                             alt="{{ c.author.username }}"
+                             class="mt-0.5 size-7 shrink-0 rounded-full"
+                             loading="lazy">
+                        <div class="min-w-0 flex-1">
+                            <p class="m-0 line-clamp-2 text-sm leading-snug text-foreground">
+                                {{ c.body|striptags|truncatechars:60 }}
+                            </p>
+                            <div class="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                                <span class="font-medium">{{ c.author.username }}</span>
+                                <span>&middot;</span>
+                                <span>{{ c.creation_time|timesince }}前</span>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {# Tag Cloud #}
+    {% if sidebar_tags %}
+    <div class="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
+            <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            {% trans 'Tag Cloud' %}
+        </h3>
+        <div class="flex flex-wrap gap-1.5">
+            {% for tag, count, size in sidebar_tags %}
+                <a href="{{ tag.get_absolute_url }}"
+                   class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary
+                   {% if size >= 18 %}border-primary/30 bg-primary/8 text-foreground text-sm font-semibold
+                   {% elif size >= 13 %}border-border text-foreground text-sm
+                   {% else %}border-border/60 text-muted-foreground text-xs{% endif %}">
+                    {{ tag.name }}
+                    <span class="tabular-nums opacity-50 text-[10px]">{{ count }}</span>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {# Recent Posts #}
+    {% if recent_articles %}
+    <div class="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
+            <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {% trans 'recent articles' %}
+        </h3>
+        <ul class="m-0 flex flex-col gap-3 p-0 list-none">
+            {% for a in recent_articles %}
+                <li>
+                    <a href="{{ a.get_absolute_url }}" class="group flex flex-col gap-1">
+                        <span class="line-clamp-2 text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
+                            {{ a.title }}
+                        </span>
+                        <span class="text-[11px] text-muted-foreground">
+                            {{ a.pub_time|date:"Y-m-d" }}
+                        </span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+
+
+    {# AdSense #}
+    {% if show_google_adsense %}
+    <div class="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <div class="textwidget">
+            {{ google_adsense_codes|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    {# GitHub Stars #}
+    <div class="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
+            <svg class="size-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.840 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.430.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            GitHub
+        </h3>
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="https://github.com/liangliangyy/DjangoBlog" rel="nofollow" class="inline-block">
+                <img src="https://resource.lylinux.net/img.shields.io/github/stars/liangliangyy/djangoblog.svg?style=social&amp;label=Star"
+                     alt="GitHub stars" loading="lazy">
+            </a>
+            <a href="https://github.com/liangliangyy/DjangoBlog" rel="nofollow" class="inline-block">
+                <img src="https://resource.lylinux.net/img.shields.io/github/forks/liangliangyy/djangoblog.svg?style=social&amp;label=Fork"
+                     alt="GitHub forks" loading="lazy">
+            </a>
+        </div>
+    </div>
+
+    {# 功能 #}
+    <div class="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
+            <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            功能
+        </h3>
+        <ul class="m-0 flex flex-col gap-0.5 p-0 list-none">
+            <li>
+                <a href="/admin/" rel="nofollow" hx-boost="false"
+                   class="block rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary hover:text-primary">
+                    {% trans 'management site' %}
+                </a>
+            </li>
+            {% if user.is_authenticated %}
+                <li>
+                    <a href="{% url 'account:logout' %}" rel="nofollow" hx-boost="false"
+                       class="block rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary hover:text-primary">
+                        {% trans 'logout' %}
+                    </a>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{% url 'account:login' %}" rel="nofollow" hx-boost="false"
+                       class="block rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary hover:text-primary">
+                        {% trans 'login' %}
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</aside>

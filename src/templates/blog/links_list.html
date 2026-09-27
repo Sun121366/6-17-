@@ -1,0 +1,54 @@
+{% extends 'share_layout/base.html' %}
+{% load blog_tags %}
+{% load cache %}
+{% load i18n %}
+{% block header %}
+
+    <title>友情链接 | {{ SITE_NAME }}</title>
+
+    <meta name="description" content="本站的友情链接列表，欢迎互换友链。"/>
+    <meta name="keywords" content="友情链接, 友链, {{ SITE_KEYWORDS }}"/>
+    <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:title" content="友情链接 | {{ SITE_NAME }}"/>
+    <meta property="og:description" content="本站的友情链接列表"/>
+    <meta property="og:url" content="{{ request.get_full_path }}"/>
+    <meta property="og:site_name" content="{{ SITE_NAME }}"/>
+
+{% endblock %}
+{% block content %}
+    <div class="mx-auto max-w-6xl px-4 py-4 lg:px-6 lg:py-6">
+        <div class="grid gap-6 lg:grid-cols-[1fr_300px]">
+            <main>
+                {# Page Header #}
+                <div class="mb-6">
+                    <h1 class="text-xl font-bold text-foreground m-0">{% trans 'links' %}</h1>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        共 {{ object_list|length }} 个链接
+                    </p>
+                </div>
+
+                {# Links Grid #}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {% for obj in object_list %}
+                        <a href="{{ obj.link }}"
+                           target="_blank"
+                           rel="nofollow noopener"
+                           class="group rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-border/80">
+                            <span class="text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+                                {{ obj.name }}
+                            </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </main>
+
+            {# Sidebar #}
+            <div class="hidden lg:block">
+                <div class="sticky top-20">
+                    {% load_sidebar user 'i' %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

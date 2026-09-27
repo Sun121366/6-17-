@@ -1,0 +1,26 @@
+<!-- 面包屑导航 - 保留schema.org标记用于SEO -->
+<nav aria-label="breadcrumb">
+    <ol itemscope itemtype="https://schema.org/BreadcrumbList"
+        class="mb-4 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+        {% for name,url in names %}
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"
+                class="inline-flex items-center">
+                <a href="{{ url }}" itemprop="item"
+                   class="transition-colors hover:text-foreground">
+                    <span itemprop="name">{{ name }}</span>
+                </a>
+                <meta itemprop="position" content="{{ forloop.counter }}"/>
+            </li>
+            <li aria-hidden="true" class="flex items-center">
+                <svg class="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+        {% endfor %}
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"
+            class="inline-flex items-center">
+            <span itemprop="name" class="line-clamp-1 text-foreground/60">{{ title }}</span>
+            <meta itemprop="position" content="{{ count }}"/>
+        </li>
+    </ol>
+</nav>

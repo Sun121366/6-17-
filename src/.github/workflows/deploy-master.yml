@@ -1,0 +1,244 @@
+name: 自动部署到生产环境
+
+on:
+  workflow_run:
+    workflows: ["Django CI", "Frontend CI"]
+    types:
+      - completed
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+      image_tag:
+        description: '镜像标签 (默认: latest)'
+        required: false
+        default: 'latest'
+        type: string
+      skip_tests:
+        description: '跳过测试直接部署 (包括Django和Frontend CI)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: deploy-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: registry.cn-shenzhen.aliyuncs.com
+  IMAGE_NAME: liangliangyy/djangoblog
+  NAMESPACE: djangoblog
+
+jobs:
+  # Job 1: 检查 CI 状态（自动触发时）
+  check-ci:
+    name: 检查 CI 状态
+    runs-on: ubuntu-latest
+    # 只在 workflow_run 触发且不跳过测试时运行
+    if: ${{ github.event_name == 'workflow_run' }}
+    outputs:
+      ci_passed: ${{ steps.check.outputs.ci_passed }}
+
+    steps:
+    - name: 检查所有 CI 是否完成
+      id: check
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        echo "🔍 检查 CI 状态 (触发者: ${{ github.event.workflow_run.name }})"
+        COMMIT_SHA="${{ github.event.workflow_run.head_sha }}"
+
+        # 检查 Django CI（必须完成且成功）
+        DJANGO_STATUS=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=$COMMIT_SHA&event=push&status=completed" \
+          | jq -r '.workflow_runs[] | select(.name == "Django CI") | .conclusion' | head -1)
+
+        # 检查 Frontend CI 是否在运行
+        FRONTEND_RUNNING=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=$COMMIT_SHA&event=push&status=in_progress" \
+          | jq -r '.workflow_runs[] | select(.name == "Frontend CI") | .id' | head -1)
+
+        # 检查 Frontend CI 完成状态
+        FRONTEND_STATUS=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=$COMMIT_SHA&event=push&status=completed" \
+          | jq -r '.workflow_runs[] | select(.name == "Frontend CI") | .conclusion' | head -1)
+
+        # Django CI 必须完成且成功
+        if [ -z "$DJANGO_STATUS" ]; then
+          echo "⏸️  Django CI 未完成，等待..."
+          echo "ci_passed=false" >> $GITHUB_OUTPUT
+          exit 0  # 成功退出，但不触发部署
+        elif [ "$DJANGO_STATUS" != "success" ]; then
+          echo "❌ Django CI 失败"
+          echo "ci_passed=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+        # Frontend CI 如果在运行，等待
+        if [ -n "$FRONTEND_RUNNING" ]; then
+          echo "⏸️  Frontend CI 运行中，等待..."
+          echo "ci_passed=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        # Frontend CI 如果运行了必须成功，未运行则跳过
+        if [ -n "$FRONTEND_STATUS" ] && [ "$FRONTEND_STATUS" != "success" ]; then
+          echo "❌ Frontend CI 失败"
+          echo "ci_passed=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+        echo "✅ 所有 CI 通过"
+        echo "ci_passed=true" >> $GITHUB_OUTPUT
+
+  # Job 2: 构建和部署
+  deploy:
+    name: 构建镜像并部署到生产环境
+    runs-on: ubuntu-latest
+    # 手动触发 或 CI检查通过后触发
+    needs: [check-ci]
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' ||
+       (needs.check-ci.result == 'success' && needs.check-ci.outputs.ci_passed == 'true'))
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v6
+
+    - name: 设置部署参数
+      id: deploy-params
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "trigger_type=手动触发" >> $GITHUB_OUTPUT
+          echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          echo "image_tag=${{ github.event.inputs.image_tag }}" >> $GITHUB_OUTPUT
+        else
+          echo "trigger_type=CI自动触发" >> $GITHUB_OUTPUT
+          echo "environment=production" >> $GITHUB_OUTPUT
+          echo "image_tag=latest" >> $GITHUB_OUTPUT
+        fi
+
+    - name: 显示部署信息
+      run: |
+        echo "🚀 部署信息："
+        echo "   触发方式: ${{ steps.deploy-params.outputs.trigger_type }}"
+        echo "   部署环境: ${{ steps.deploy-params.outputs.environment }}"
+        echo "   镜像标签: ${{ steps.deploy-params.outputs.image_tag }}"
+      
+    - name: 设置Docker Buildx
+      uses: docker/setup-buildx-action@v4
+      
+    - name: 登录私有镜像仓库
+      uses: docker/login-action@v4
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+        
+    - name: 提取镜像元数据
+      id: meta
+      uses: docker/metadata-action@v6
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=raw,value=${{ steps.deploy-params.outputs.image_tag }}
+          
+    - name: 构建并推送Docker镜像
+      uses: docker/build-push-action@v7
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+        # 阿里云ACR不支持 oci.empty 清单（attestation/provenance），必须关闭
+        provenance: false
+        sbom: false
+
+    - name: 部署到生产服务器
+      uses: appleboy/ssh-action@v1.2.5
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        port: ${{ secrets.PRODUCTION_PORT || 22 }}
+        script: |
+          echo "🚀 开始部署 DjangoBlog..."
+          
+          # 检查kubectl是否可用
+          if ! command -v kubectl &> /dev/null; then
+            echo "❌ 错误: kubectl 未安装或不在PATH中"
+            exit 1
+          fi
+          
+          # 检查命名空间是否存在
+          if ! kubectl get namespace ${{ env.NAMESPACE }} &> /dev/null; then
+            echo "❌ 错误: 命名空间 ${{ env.NAMESPACE }} 不存在"
+            exit 1
+          fi
+          
+          # 更新deployment镜像
+          echo "📦 更新deployment镜像为: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.deploy-params.outputs.image_tag }}"
+          kubectl set image deployment/djangoblog \
+            djangoblog=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.deploy-params.outputs.image_tag }} \
+            -n ${{ env.NAMESPACE }}
+          
+          # 重启deployment
+          echo "🔄 重启deployment..."
+          kubectl -n ${{ env.NAMESPACE }} rollout restart deployment djangoblog
+          
+          # 等待deployment完成
+          echo "⏳ 等待deployment完成..."
+          kubectl rollout status deployment/djangoblog -n ${{ env.NAMESPACE }} --timeout=300s
+          
+          # 检查deployment状态
+          echo "✅ 检查deployment状态..."
+          kubectl get deployment djangoblog -n ${{ env.NAMESPACE }}
+          kubectl get pods -l app=djangoblog -n ${{ env.NAMESPACE }}
+          
+          echo "🎉 部署完成！"
+          
+    - name: 发送部署通知
+      if: always()
+      run: |
+        # 设置通知内容
+        if [ "${{ job.status }}" = "success" ]; then
+          TITLE="✅ DjangoBlog部署成功"
+          STATUS="成功"
+        else
+          TITLE="❌ DjangoBlog部署失败"
+          STATUS="失败"
+        fi
+        
+        MESSAGE="部署状态: ${STATUS}
+        触发方式: ${{ steps.deploy-params.outputs.trigger_type }}
+        部署环境: ${{ steps.deploy-params.outputs.environment }}
+        镜像标签: ${{ steps.deploy-params.outputs.image_tag }}
+        提交者: ${{ github.actor }}
+        时间: $(date '+%Y-%m-%d %H:%M:%S')
+        
+        查看详情: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        
+        # 发送Server酱通知
+        if [ -n "${{ secrets.SERVERCHAN_KEY }}" ]; then
+          echo "{\"title\": \"${TITLE}\", \"desp\": \"${MESSAGE}\"}" > /tmp/serverchan.json
+          
+          curl --location "https://sctapi.ftqq.com/${{ secrets.SERVERCHAN_KEY }}.send" \
+            --header "Content-Type: application/json" \
+            --data @/tmp/serverchan.json \
+            --silent > /dev/null
+          
+          rm -f /tmp/serverchan.json
+          echo "📱 部署通知已发送"
+        fi
