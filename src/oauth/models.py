@@ -1,4 +1,10 @@
 # Create your models here.
+"""第三方登录相关模型。
+
+OAuthUser 保存第三方平台返回的用户身份，并可绑定到站内 BlogUser；
+OAuthConfig 保存各 OAuth 平台的客户端配置。
+"""
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -7,6 +13,12 @@ from django.utils.translation import gettext_lazy as _
 
 
 class OAuthUser(models.Model):
+    """第三方用户映射模型。
+
+    author 为空时表示第三方身份尚未绑定站内账号；绑定后一个站内用户可以
+    关联多个不同平台的 OAuthUser 记录。
+    """
+    # 绑定的站内用户；允许为空，表示第三方账号暂未完成绑定。
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('author'),
@@ -33,6 +45,10 @@ class OAuthUser(models.Model):
 
 
 class OAuthConfig(models.Model):
+    """OAuth 平台配置模型。
+
+    保存平台类型、AppKey、AppSecret 和回调地址；同一平台只允许存在一条配置。
+    """
     TYPE = (
         ('weibo', _('weibo')),
         ('google', _('google')),
@@ -40,6 +56,7 @@ class OAuthConfig(models.Model):
         ('facebook', 'FaceBook'),
         ('qq', 'QQ'),
     )
+    # 平台类型，例如 weibo、github、google、qq。
     type = models.CharField(_('type'), max_length=10, choices=TYPE, default='a')
     appkey = models.CharField(max_length=200, verbose_name='AppKey')
     appsecret = models.CharField(max_length=200, verbose_name='AppSecret')

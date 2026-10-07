@@ -1,0 +1,152 @@
+@startuml
+title DjangoBlog 数据模型类图
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam linetype ortho
+hide circle
+
+class "AbstractUser（Django内置）" as AbstractUser {
+  +username
+  +password
+  +email
+  +is_staff
+  +is_superuser
+}
+
+abstract class BaseModel {
+  +id: AutoField
+  +creation_time: DateTimeField
+  +last_modify_time: DateTimeField
+  +save()
+  +get_full_url()
+  +{abstract} get_absolute_url()
+}
+
+class BlogUser {
+  +nickname: CharField
+  +creation_time: DateTimeField
+  +last_modify_time: DateTimeField
+  +source: CharField
+  +get_absolute_url()
+  +get_full_url()
+}
+
+class Article {
+  +title: CharField
+  +body: MDTextField
+  +pub_time: DateTimeField
+  +status: CharField
+  +comment_status: CharField
+  +type: CharField
+  +views: PositiveIntegerField
+  +article_order: IntegerField
+  +show_toc: BooleanField
+  +author: ForeignKey
+  +category: ForeignKey
+  +tags: ManyToManyField
+  +viewed()
+  +comment_list()
+}
+
+class Category {
+  +name: CharField
+  +parent_category: ForeignKey
+  +slug: SlugField
+  +index: IntegerField
+  +get_category_tree()
+  +get_sub_categorys()
+}
+
+class Tag {
+  +name: CharField
+  +slug: SlugField
+  +get_article_count()
+}
+
+class Comment {
+  +body: TextField
+  +author: ForeignKey
+  +article: ForeignKey
+  +parent_comment: ForeignKey
+  +is_enable: BooleanField
+  +get_reactions_summary()
+}
+
+class CommentReaction {
+  +comment: ForeignKey
+  +user: ForeignKey
+  +reaction_type: CharField
+  +created_at: DateTimeField
+}
+
+class OAuthUser {
+  +author: ForeignKey
+  +openid: CharField
+  +nickname: CharField
+  +token: CharField
+  +type: CharField
+  +email: CharField
+}
+
+class OAuthConfig {
+  +type: CharField
+  +appkey: CharField
+  +appsecret: CharField
+  +callback_url: CharField
+  +is_enable: BooleanField
+}
+
+class Links {
+  +name: CharField
+  +link: URLField
+  +sequence: IntegerField
+  +is_enable: BooleanField
+  +show_type: CharField
+}
+
+class SideBar {
+  +name: CharField
+  +content: TextField
+  +sequence: IntegerField
+  +is_enable: BooleanField
+}
+
+class BlogSettings {
+  +site_name: CharField
+  +site_description: TextField
+  +site_keywords: TextField
+  +color_scheme: CharField
+  +comment_need_review: BooleanField
+}
+
+class commands {
+  +title: CharField
+  +command: CharField
+  +describe: CharField
+}
+
+class EmailSendLog {
+  +emailto: CharField
+  +title: CharField
+  +content: TextField
+  +send_result: BooleanField
+}
+
+AbstractUser <|-- BlogUser
+BaseModel <|-- Article
+BaseModel <|-- Category
+BaseModel <|-- Tag
+
+BlogUser "1" --> "0..*" Article : author
+Category "1" --> "0..*" Article : category
+Article "0..*" -- "0..*" Tag : tags
+Category "0..1" --> "0..*" Category : parent_category
+
+BlogUser "1" --> "0..*" Comment : author
+Article "1" --> "0..*" Comment : article
+Comment "0..1" --> "0..*" Comment : parent_comment
+Comment "1" --> "0..*" CommentReaction : reactions
+BlogUser "1" --> "0..*" CommentReaction : user
+BlogUser "0..1" --> "0..*" OAuthUser : author
+
+@enduml

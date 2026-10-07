@@ -1,3 +1,9 @@
+"""评论与互动模型。
+
+定义文章评论、嵌套回复以及评论的 Emoji 反应关系，用于描述用户围绕文章
+产生的互动数据。
+"""
+
 from django.conf import settings
 from django.db import models
 from django.utils.timezone import now
@@ -9,17 +15,26 @@ from blog.models import Article
 # Create your models here.
 
 class Comment(models.Model):
+    """文章评论模型。
+
+    author 指向评论用户，article 指向被评论文章，parent_comment 通过自关联
+    实现回复评论；is_enable 控制评论是否通过审核并展示。
+    """
+    # 评论正文，当前最大长度为 300 个字符。
     body = models.TextField('正文', max_length=300)
     creation_time = models.DateTimeField(_('creation time'), default=now)
     last_modify_time = models.DateTimeField(_('last modify time'), default=now)
+    # 评论作者：一个用户可以发表多条评论。
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('author'),
         on_delete=models.CASCADE)
+    # 所属文章：一篇文章可以包含多条评论。
     article = models.ForeignKey(
         Article,
         verbose_name=_('article'),
         on_delete=models.CASCADE)
+    # 父评论：为空表示顶层评论，非空表示对某条评论的回复。
     parent_comment = models.ForeignKey(
         'self',
         verbose_name=_('parent comment'),
@@ -106,17 +121,20 @@ class CommentReaction(models.Model):
         ('👀', 'eyes'),
     ]
 
+    # 被反应的评论。
     comment = models.ForeignKey(
         Comment,
         verbose_name=_('comment'),
         on_delete=models.CASCADE,
         related_name='reactions'
     )
+    # 发起评论反应的用户。
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('user'),
         on_delete=models.CASCADE
     )
+    # Emoji 反应类型，同一用户对同一评论的同一类型只能记录一次。
     reaction_type = models.CharField(
         _('reaction type'),
         max_length=10,
@@ -127,7 +145,7 @@ class CommentReaction(models.Model):
     class Meta:
         verbose_name = _('comment reaction')
         verbose_name_plural = _('comment reactions')
-        # 每个用户对同一评论的同一种 emoji 只能点一次
+        # 数据库唯一约束：防止重复点赞或重复添加同一种 Emoji 反应。
         unique_together = ['comment', 'user', 'reaction_type']
         indexes = [
             models.Index(fields=['comment', 'reaction_type'], name='idx_comment_reaction'),

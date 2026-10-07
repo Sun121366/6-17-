@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1320" viewBox="0 0 1800 1320">
+<defs>
+<marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+  <path d="M0,0 L12,6 L0,12 z" fill="#475569"/>
+</marker>
+<marker id="triangle" markerWidth="14" markerHeight="14" refX="7" refY="7" orient="auto" markerUnits="strokeWidth">
+  <path d="M0,0 L14,7 L0,14 z" fill="#ffffff" stroke="#475569" stroke-width="1.5"/>
+</marker>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="900" y="52" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="34" font-weight="700" fill="#0f172a">DjangoBlog 数据模型类图</text>
+<text x="900" y="82" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="16" fill="#475569">第二周：数据库与 Model 分析</text>
+<g><rect x="40" y="160" width="300" height="220" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M48,160 H332 Q340,160 340,168 V206 H40 V168 Q40,160 48,160" fill="#334155"/>
+<text x="190.0" y="178" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="12" fill="#e2e8f0">自定义用户</text>
+<text x="190.0" y="199" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">BlogUser</text>
+<text x="54" y="230" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• nickname</text>
+<text x="54" y="251" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• creation_time / last_modify_time</text>
+<text x="54" y="272" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• source</text>
+<text x="54" y="293" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• get_absolute_url()</text>
+<text x="54" y="314" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• AUTH_USER_MODEL 指向本类</text>
+</g>
+<g><rect x="40" y="470" width="300" height="150" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M48,470 H332 Q340,470 340,478 V516 H40 V478 Q40,470 48,470" fill="#334155"/>
+<text x="190.0" y="488" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="12" fill="#e2e8f0">Django 内置</text>
+<text x="190.0" y="509" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">AbstractUser</text>
+<text x="54" y="540" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• username / password / email</text>
+<text x="54" y="561" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• is_staff / is_superuser</text>
+<text x="54" y="582" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• 认证与权限基础字段</text>
+</g>
+<g><rect x="40" y="760" width="300" height="170" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M48,760 H332 Q340,760 340,768 V806 H40 V768 Q40,760 48,760" fill="#334155"/>
+<text x="190.0" y="778" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="12" fill="#e2e8f0">第三方用户</text>
+<text x="190.0" y="799" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">OAuthUser</text>
+<text x="54" y="830" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• author（可空 FK）</text>
+<text x="54" y="851" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• openid / nickname / token</text>
+<text x="54" y="872" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• type / email / metadata</text>
+</g>
+<g><rect x="420" y="90" width="300" height="180" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M428,90 H712 Q720,90 720,98 V136 H420 V98 Q420,90 428,90" fill="#334155"/>
+<text x="570.0" y="108" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="12" fill="#e2e8f0">abstract</text>
+<text x="570.0" y="129" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">BaseModel</text>
+<text x="434" y="160" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• id</text>
+<text x="434" y="181" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• creation_time</text>
+<text x="434" y="202" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• last_modify_time</text>
+<text x="434" y="223" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• save()</text>
+<text x="434" y="244" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• get_absolute_url()*</text>
+</g>
+<g><rect x="420" y="360" width="360" height="300" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M428,360 H772 Q780,360 780,368 V406 H420 V368 Q420,360 428,360" fill="#334155"/>
+<text x="600.0" y="378" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="12" fill="#e2e8f0">文章/页面</text>
+<text x="600.0" y="399" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">Article</text>
+<text x="434" y="430" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• title / body / pub_time</text>
+<text x="434" y="451" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• status / comment_status / type</text>
+<text x="434" y="472" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• views / article_order / show_toc</text>
+<text x="434" y="493" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• author: FK → BlogUser</text>
+<text x="434" y="514" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• category: FK → Category</text>
+<text x="434" y="535" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• tags: M:N → Tag</text>
+<text x="434" y="556" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• viewed() / comment_list()</text>
+</g>
+<g><rect x="850" y="360" width="250" height="220" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M858,360 H1092 Q1100,360 1100,368 V406 H850 V368 Q850,360 858,360" fill="#334155"/>
+<text x="975.0" y="378" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="12" fill="#e2e8f0">分类</text>
+<text x="975.0" y="399" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">Category</text>
+<text x="864" y="430" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• name（唯一）</text>
+<text x="864" y="451" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• parent_category: self FK</text>
+<text x="864" y="472" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• slug / index</text>
+<text x="864" y="493" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• get_category_tree()</text>
+<text x="864" y="514" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• get_sub_categorys()</text>
+</g>
+<g><rect x="1170" y="360" width="230" height="180" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M1178,360 H1392 Q1400,360 1400,368 V406 H1170 V368 Q1170,360 1178,360" fill="#334155"/>
+<text x="1285.0" y="378" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="12" fill="#e2e8f0">标签</text>
+<text x="1285.0" y="399" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">Tag</text>
+<text x="1184" y="430" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• name（唯一）</text>
+<text x="1184" y="451" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• slug</text>
+<text x="1184" y="472" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• get_article_count()</text>
+</g>
+<g><rect x="520" y="820" width="360" height="230" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M528,820 H872 Q880,820 880,828 V866 H520 V828 Q520,820 528,820" fill="#334155"/>
+<text x="700.0" y="838" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="12" fill="#e2e8f0">评论/回复</text>
+<text x="700.0" y="859" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">Comment</text>
+<text x="534" y="890" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• body / creation_time</text>
+<text x="534" y="911" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• author: FK → BlogUser</text>
+<text x="534" y="932" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• article: FK → Article</text>
+<text x="534" y="953" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• parent_comment: self FK</text>
+<text x="534" y="974" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• is_enable</text>
+<text x="534" y="995" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• get_reactions_summary()</text>
+</g>
+<g><rect x="940" y="820" width="340" height="180" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M948,820 H1272 Q1280,820 1280,828 V866 H940 V828 Q940,820 948,820" fill="#334155"/>
+<text x="1110.0" y="838" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="12" fill="#e2e8f0">Emoji 反应</text>
+<text x="1110.0" y="859" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">CommentReaction</text>
+<text x="954" y="890" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• comment: FK → Comment</text>
+<text x="954" y="911" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• user: FK → BlogUser</text>
+<text x="954" y="932" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• reaction_type</text>
+<text x="954" y="953" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• created_at</text>
+<text x="954" y="974" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• 唯一约束：评论+用户+类型</text>
+</g>
+<line x1="190" y1="470" x2="190" y2="390" stroke="#475569" stroke-width="2" marker-end="url(#triangle)"/>
+<line x1="570" y1="270" x2="600" y2="360" stroke="#475569" stroke-width="2" marker-end="url(#triangle)"/>
+<line x1="720" y1="210" x2="975" y2="360" stroke="#475569" stroke-width="2" marker-end="url(#triangle)"/>
+<line x1="720" y1="180" x2="1285" y2="360" stroke="#475569" stroke-width="2" marker-end="url(#triangle)"/>
+<line x1="340" y1="260" x2="420" y2="405" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="360" y="315" font-family="Microsoft YaHei, Arial" font-size="13" fill="#b91c1c">1 : N  author</text>
+<line x1="850" y1="470" x2="780" y2="470" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="795" y="455" font-family="Microsoft YaHei, Arial" font-size="13" fill="#b91c1c">1 : N  category</text>
+<line x1="780" y1="430" x2="1170" y2="430" stroke="#475569" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="970" y="417" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="13" fill="#b91c1c">M : N  tags</text>
+<path d="M975 580 C975 650 1030 650 1030 580" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="1025" y="635" font-family="Microsoft YaHei, Arial" font-size="13" fill="#b91c1c">parent</text>
+<path d="M390 350 L460 350 L460 880 L520 880" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="450" y="650" font-family="Microsoft YaHei, Arial" font-size="13" fill="#b91c1c">1 : N  author</text>
+<line x1="610" y1="660" x2="650" y2="820" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="625" y="745" font-family="Microsoft YaHei, Arial" font-size="13" fill="#b91c1c">1 : N  article</text>
+<path d="M880 900 L930 900 L930 970 L880 970" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="938" y="940" font-family="Microsoft YaHei, Arial" font-size="13" fill="#b91c1c">parent_comment</text>
+<line x1="880" y1="860" x2="940" y2="860" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="885" y="845" font-family="Microsoft YaHei, Arial" font-size="13" fill="#b91c1c">1 : N  reactions</text>
+<path d="M340 330 L390 330 L390 1000 L870 1000" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<text x="430" y="1018" font-family="Microsoft YaHei, Arial" font-size="13" fill="#b91c1c">1 : N  reaction user</text>
+<path d="M340 350 L400 350 L400 790" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<text x="345" y="735" font-family="Microsoft YaHei, Arial" font-size="13" fill="#b91c1c">0..1 : 0..N  author</text>
+<rect x="1390" y="100" width="370" height="1050" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+<text x="1575.0" y="135" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="22" font-weight="700" fill="#334155">配置与辅助模型</text>
+<g><rect x="1408" y="165" width="334" height="130" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M1416,165 H1734 Q1742,165 1742,173 V211 H1408 V173 Q1408,165 1416,165" fill="#334155"/>
+<text x="1575.0" y="196" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">OAuthConfig</text>
+<text x="1422" y="235" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• type / appkey / appsecret</text>
+<text x="1422" y="256" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• callback_url / is_enable</text>
+<text x="1422" y="277" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• 同一平台仅一条配置</text>
+</g>
+<g><rect x="1408" y="315" width="334" height="130" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M1416,315 H1734 Q1742,315 1742,323 V361 H1408 V323 Q1408,315 1416,315" fill="#334155"/>
+<text x="1575.0" y="346" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">Links</text>
+<text x="1422" y="385" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• name / link / sequence</text>
+<text x="1422" y="406" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• is_enable / show_type</text>
+<text x="1422" y="427" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• 友情链接</text>
+</g>
+<g><rect x="1408" y="465" width="334" height="130" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M1416,465 H1734 Q1742,465 1742,473 V511 H1408 V473 Q1408,465 1416,465" fill="#334155"/>
+<text x="1575.0" y="496" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">SideBar</text>
+<text x="1422" y="535" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• name / content</text>
+<text x="1422" y="556" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• sequence / is_enable</text>
+<text x="1422" y="577" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• 自定义侧边栏</text>
+</g>
+<g><rect x="1408" y="615" width="334" height="130" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M1416,615 H1734 Q1742,615 1742,623 V661 H1408 V623 Q1408,615 1416,615" fill="#334155"/>
+<text x="1575.0" y="646" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">BlogSettings</text>
+<text x="1422" y="685" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• site_name / SEO / 主题</text>
+<text x="1422" y="706" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• 备案 / 评论审核 / 页眉页脚</text>
+<text x="1422" y="727" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• clean() 保证单例</text>
+</g>
+<g><rect x="1408" y="765" width="334" height="130" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M1416,765 H1734 Q1742,765 1742,773 V811 H1408 V773 Q1408,765 1416,765" fill="#334155"/>
+<text x="1575.0" y="796" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">commands</text>
+<text x="1422" y="835" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• title / command / describe</text>
+<text x="1422" y="856" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• 运维命令说明</text>
+</g>
+<g><rect x="1408" y="915" width="334" height="130" rx="8" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+<path d="M1416,915 H1734 Q1742,915 1742,923 V961 H1408 V923 Q1408,915 1416,915" fill="#334155"/>
+<text x="1575.0" y="946" text-anchor="middle" font-family="Microsoft YaHei, Arial" font-size="18" font-weight="700" fill="#ffffff">EmailSendLog</text>
+<text x="1422" y="985" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• emailto / title / content</text>
+<text x="1422" y="1006" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• send_result / creation_time</text>
+<text x="1422" y="1027" font-family="Microsoft YaHei, Arial" font-size="13" fill="#1e293b">• 邮件发送日志</text>
+</g>
+<text x="40" y="1240" font-family="Microsoft YaHei, Arial" font-size="14" fill="#475569">说明：实线箭头表示外键关联，双向连线表示多对多，空心三角表示继承；辅助配置表无核心内容关系。</text>
+</svg>

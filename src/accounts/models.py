@@ -1,3 +1,9 @@
+"""用户与账号模型。
+
+该模块定义博客系统的统一用户模型，并通过 Django 的认证框架提供
+登录、权限、用户资料和作者主页所需的数据结构。
+"""
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
@@ -9,6 +15,13 @@ from djangoblog.utils import get_current_site
 # Create your models here.
 
 class BlogUser(AbstractUser):
+    """博客用户模型。
+
+    继承 Django 的 AbstractUser，复用用户名、密码、邮箱、权限和登录能力；
+    在此基础上扩展博客业务需要的昵称、创建时间、修改时间和来源字段。
+    项目通过 AUTH_USER_MODEL 将其作为统一用户模型使用。
+    """
+    # 页面展示优先使用昵称；为空时可回退到 username。
     nickname = models.CharField(_('nick name'), max_length=100, blank=True)
     creation_time = models.DateTimeField(_('creation time'), default=now)
     last_modify_time = models.DateTimeField(_('last modify time'), default=now)

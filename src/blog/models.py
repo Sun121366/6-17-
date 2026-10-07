@@ -1,3 +1,9 @@
+"""博客核心数据模型。
+
+本模块集中定义文章、分类、标签、友情链接、侧边栏和网站配置等模型。
+模型之间的外键和多对多关系由 Django ORM 映射到 MySQL 数据表及关联表。
+"""
+
 import logging
 import re
 from abc import abstractmethod
@@ -19,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class LinkShowType(models.TextChoices):
+    """友情链接的展示位置枚举。"""
     I = ('i', _('index'))
     L = ('l', _('list'))
     P = ('p', _('post'))
@@ -27,6 +34,11 @@ class LinkShowType(models.TextChoices):
 
 
 class BaseModel(models.Model):
+    """业务模型抽象基类。
+
+    统一提供主键、创建时间和修改时间字段；该模型不会单独生成数据库表，
+    而是由 Article、Category、Tag 等子类继承，从而避免重复定义公共字段。
+    """
     id = models.AutoField(primary_key=True)
     creation_time = models.DateTimeField(_('creation time'), default=now)
     last_modify_time = models.DateTimeField(_('modify time'), default=now)
@@ -60,7 +72,12 @@ class BaseModel(models.Model):
 
 
 class Article(BaseModel):
-    """文章"""
+    """文章模型。
+
+    保存文章或独立页面的正文、发布时间、状态、作者、分类、标签和浏览量。
+    其中 author 关联统一用户模型，category 关联分类模型，tags 与标签模型
+    构成多对多关系。
+    """
     STATUS_CHOICES = (
         ('d', _('Draft')),
         ('p', _('Published')),
@@ -89,21 +106,25 @@ class Article(BaseModel):
         default='o')
     type = models.CharField(_('type'), max_length=1, choices=TYPE, default='a')
     views = models.PositiveIntegerField(_('views'), default=0)
+    # 文章作者：一篇用户文章只能属于一个用户，一个用户可以拥有多篇文章。
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('author'),
         blank=False,
         null=False,
         on_delete=models.CASCADE)
+    # 手工排序权重，值越大在默认排序中越靠前。
     article_order = models.IntegerField(
         _('order'), blank=False, null=False, default=0)
     show_toc = models.BooleanField(_('show toc'), blank=False, null=False, default=False)
+    # 文章分类：一个分类可包含多篇文章；删除分类时相关文章级联删除。
     category = models.ForeignKey(
         'Category',
         verbose_name=_('category'),
         on_delete=models.CASCADE,
         blank=False,
         null=False)
+    # 文章标签：Django 会自动生成中间关系表，实现文章与标签的多对多映射。
     tags = models.ManyToManyField('Tag', verbose_name=_('tag'), blank=True)
 
     def body_to_string(self):
@@ -189,7 +210,11 @@ class Article(BaseModel):
 
 
 class Category(BaseModel):
-    """文章分类"""
+    """文章分类模型。
+
+    通过 parent_category 自关联形成树形分类；name 唯一，slug 用于生成
+    友好 URL，index 控制后台和前台展示顺序。
+    """
     name = models.CharField(_('category name'), max_length=30, unique=True)
     parent_category = models.ForeignKey(
         'self',
@@ -252,7 +277,10 @@ class Category(BaseModel):
 
 
 class Tag(BaseModel):
-    """文章标签"""
+    """文章标签模型。
+
+    标签与文章是多对多关系，一个标签可以属于多篇文章，一篇文章可设置多个标签。
+    """
     name = models.CharField(_('tag name'), max_length=30, unique=True)
     slug = models.SlugField(default='no-slug', max_length=60, blank=True)
 
@@ -273,7 +301,10 @@ class Tag(BaseModel):
 
 
 class Links(models.Model):
-    """友情链接"""
+    """友情链接模型。
+
+    保存链接名称、URL、排序、启用状态和展示位置；sequence 唯一，用于稳定排序。
+    """
 
     name = models.CharField(_('link name'), max_length=30, unique=True)
     link = models.URLField(_('link'))
@@ -298,7 +329,10 @@ class Links(models.Model):
 
 
 class SideBar(models.Model):
-    """侧边栏,可以展示一些html内容"""
+    """侧边栏内容模型。
+
+    保存自定义 HTML 内容的标题、正文、排序和启用状态，用于扩展页面侧边区域。
+    """
     name = models.CharField(_('title'), max_length=100)
     content = models.TextField(_('content'))
     sequence = models.IntegerField(_('order'), unique=True)
@@ -316,7 +350,11 @@ class SideBar(models.Model):
 
 
 class BlogSettings(models.Model):
-    """blog的配置"""
+    """网站全局配置模型。
+
+    保存站点名称、SEO、主题配色、备案信息、评论审核和全局页眉页脚配置。
+    clean() 方法限制系统中只能存在一条配置记录，因此该模型属于单例配置。
+    """
 
     COLOR_SCHEMES = (
         ('purple', _('紫色主题 - Purple Dream')),
