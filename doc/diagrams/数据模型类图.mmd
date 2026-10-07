@@ -1,0 +1,146 @@
+classDiagram
+    direction LR
+
+    class AbstractUser {
+        <<Django内置>>
+        +username
+        +password
+        +email
+        +is_staff
+        +is_superuser
+    }
+
+    class BaseModel {
+        <<abstract>>
+        +id
+        +creation_time
+        +last_modify_time
+        +save()
+        +get_full_url()
+        +get_absolute_url()*
+    }
+
+    class BlogUser {
+        +nickname
+        +creation_time
+        +last_modify_time
+        +source
+        +get_absolute_url()
+        +get_full_url()
+    }
+
+    class Article {
+        +title
+        +body
+        +pub_time
+        +status
+        +comment_status
+        +type
+        +views
+        +article_order
+        +show_toc
+        +author
+        +category
+        +tags
+        +viewed()
+        +comment_list()
+    }
+
+    class Category {
+        +name
+        +parent_category
+        +slug
+        +index
+        +get_category_tree()
+        +get_sub_categorys()
+    }
+
+    class Tag {
+        +name
+        +slug
+        +get_article_count()
+    }
+
+    class Comment {
+        +body
+        +author
+        +article
+        +parent_comment
+        +is_enable
+        +get_reactions_summary()
+    }
+
+    class CommentReaction {
+        +comment
+        +user
+        +reaction_type
+        +created_at
+    }
+
+    class OAuthUser {
+        +author
+        +openid
+        +nickname
+        +token
+        +type
+        +email
+    }
+
+    class OAuthConfig {
+        +type
+        +appkey
+        +appsecret
+        +callback_url
+        +is_enable
+    }
+
+    class Links {
+        +name
+        +link
+        +sequence
+        +is_enable
+        +show_type
+    }
+
+    class SideBar {
+        +name
+        +content
+        +sequence
+        +is_enable
+    }
+
+    class BlogSettings {
+        +site_name
+        +site_description
+        +site_keywords
+        +color_scheme
+        +comment_need_review
+    }
+
+    class commands {
+        +title
+        +command
+        +describe
+    }
+
+    class EmailSendLog {
+        +emailto
+        +title
+        +content
+        +send_result
+    }
+
+    AbstractUser <|-- BlogUser
+    BaseModel <|-- Article
+    BaseModel <|-- Category
+    BaseModel <|-- Tag
+    BlogUser "1" --> "0..*" Article : author
+    Category "1" --> "0..*" Article : category
+    Article "0..*" -- "0..*" Tag : tags
+    Category "0..1" --> "0..*" Category : parent_category
+    BlogUser "1" --> "0..*" Comment : author
+    Article "1" --> "0..*" Comment : article
+    Comment "0..1" --> "0..*" Comment : parent_comment
+    Comment "1" --> "0..*" CommentReaction : reactions
+    BlogUser "1" --> "0..*" CommentReaction : user
+    BlogUser "0..1" --> "0..*" OAuthUser : author
