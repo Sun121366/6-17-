@@ -1,3 +1,9 @@
+"""博客视图层。
+
+视图接收 URL 路由传入的请求，调用模型完成数据查询，再把结果交给模板渲染。
+本模块主要使用 Django 通用视图和项目自定义 Mixin，体现 MTV 中 View 的职责。
+"""
+
 import logging
 import os
 import uuid
