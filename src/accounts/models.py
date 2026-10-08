@@ -1,3 +1,4 @@
+# [TWL/唐文龙] 本文件中 2026-10-07 新增的中文模型说明、配置说明与业务注释由唐文龙补充整理。
 """用户与账号模型。
 
 该模块定义博客系统的统一用户模型，并通过 Django 的认证框架提供
@@ -21,7 +22,7 @@ class BlogUser(AbstractUser):
     在此基础上扩展博客业务需要的昵称、创建时间、修改时间和来源字段。
     项目通过 AUTH_USER_MODEL 将其作为统一用户模型使用。
     """
-    # 页面展示优先使用昵称；为空时可回退到 username。
+    # 页面展示优先使用昵称；为空时可回退到 username。 [TWL]
     nickname = models.CharField(_('nick name'), max_length=100, blank=True)
     creation_time = models.DateTimeField(_('creation time'), default=now)
     last_modify_time = models.DateTimeField(_('last modify time'), default=now)

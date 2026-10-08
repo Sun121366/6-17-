@@ -1,3 +1,4 @@
+# [TWL/唐文龙] 本文件中 2026-10-07 新增的中文模型说明、配置说明与业务注释由唐文龙补充整理。
 """博客核心数据模型。
 
 本模块集中定义文章、分类、标签、友情链接、侧边栏和网站配置等模型。
@@ -106,25 +107,25 @@ class Article(BaseModel):
         default='o')
     type = models.CharField(_('type'), max_length=1, choices=TYPE, default='a')
     views = models.PositiveIntegerField(_('views'), default=0)
-    # 文章作者：一篇用户文章只能属于一个用户，一个用户可以拥有多篇文章。
+    # 文章作者：一篇用户文章只能属于一个用户，一个用户可以拥有多篇文章。 [TWL]
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('author'),
         blank=False,
         null=False,
         on_delete=models.CASCADE)
-    # 手工排序权重，值越大在默认排序中越靠前。
+    # 手工排序权重，值越大在默认排序中越靠前。 [TWL]
     article_order = models.IntegerField(
         _('order'), blank=False, null=False, default=0)
     show_toc = models.BooleanField(_('show toc'), blank=False, null=False, default=False)
-    # 文章分类：一个分类可包含多篇文章；删除分类时相关文章级联删除。
+    # 文章分类：一个分类可包含多篇文章；删除分类时相关文章级联删除。 [TWL]
     category = models.ForeignKey(
         'Category',
         verbose_name=_('category'),
         on_delete=models.CASCADE,
         blank=False,
         null=False)
-    # 文章标签：Django 会自动生成中间关系表，实现文章与标签的多对多映射。
+    # 文章标签：Django 会自动生成中间关系表，实现文章与标签的多对多映射。 [TWL]
     tags = models.ManyToManyField('Tag', verbose_name=_('tag'), blank=True)
 
     def body_to_string(self):

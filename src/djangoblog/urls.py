@@ -1,3 +1,4 @@
+# [TWL/唐文龙] 本文件中 2026-10-07 新增的中文模型说明、配置说明与业务注释由唐文龙补充整理。
 """djangoblog URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -38,13 +39,13 @@ sitemaps = {
     'static': StaticViewSitemap
 }
 
-# 统一错误页处理入口，由 blog 应用提供 404、500 和 403 页面。
+# 统一错误页处理入口，由 blog 应用提供 404、500 和 403 页面。 [TWL]
 handler404 = 'blog.views.page_not_found_view'
 handler500 = 'blog.views.server_error_view'
 handle403 = 'blog.views.permission_denied_view'
 
 
-# 健康检查接口：仅返回服务状态和当前时间，便于部署平台探测进程。
+# 健康检查接口：仅返回服务状态和当前时间，便于部署平台探测进程。 [TWL]
 def health_check(request):
     """
     健康检查接口
@@ -55,12 +56,12 @@ def health_check(request):
         'timestamp': time.time()
     })
 
-# 非本地化路由：国际化和健康检查接口不经过语言前缀。
+# 非本地化路由：国际化和健康检查接口不经过语言前缀。 [TWL]
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
     path('health/', health_check, name='health_check'),
 ]
-# 业务路由：后台、博客、评论、账号、OAuth、站点地图和搜索均在此汇总。
+# 业务路由：后台、博客、评论、账号、OAuth、站点地图和搜索均在此汇总。 [TWL]
 urlpatterns += i18n_patterns(
     re_path(r'^admin/', admin_site.urls),
     re_path(r'', include('blog.urls', namespace='blog')),

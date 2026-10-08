@@ -1,3 +1,4 @@
+# [TWL/唐文龙] 本文件中 2026-10-07 新增的中文模型说明、配置说明与业务注释由唐文龙补充整理。
 # Create your models here.
 """第三方登录相关模型。
 
@@ -18,7 +19,7 @@ class OAuthUser(models.Model):
     author 为空时表示第三方身份尚未绑定站内账号；绑定后一个站内用户可以
     关联多个不同平台的 OAuthUser 记录。
     """
-    # 绑定的站内用户；允许为空，表示第三方账号暂未完成绑定。
+    # 绑定的站内用户；允许为空，表示第三方账号暂未完成绑定。 [TWL]
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('author'),
@@ -56,7 +57,7 @@ class OAuthConfig(models.Model):
         ('facebook', 'FaceBook'),
         ('qq', 'QQ'),
     )
-    # 平台类型，例如 weibo、github、google、qq。
+    # 平台类型，例如 weibo、github、google、qq。 [TWL]
     type = models.CharField(_('type'), max_length=10, choices=TYPE, default='a')
     appkey = models.CharField(max_length=200, verbose_name='AppKey')
     appsecret = models.CharField(max_length=200, verbose_name='AppSecret')
