@@ -148,6 +148,7 @@ ARTICLE_TAGS = {tag for seed in ARTICLE_SEEDS for tag in seed["tags"]}
 
 
 def _get_or_rename_category(new_name, old_names, parent=None):
+    # [TWL/唐文龙] 以下辅助说明由本人补充。
     """优先复用旧分类对象，避免改名时破坏已有文章关系。"""
     category = Category.objects.filter(name=new_name).first()
     if category:

@@ -1,4 +1,5 @@
 # [TWL/唐文龙] 本文件中 2026-10-07 新增的中文模型说明、配置说明与业务注释由唐文龙补充整理。
+# [TWL/唐文龙] 以下模块说明由本人补充。
 """评论与互动模型。
 
 定义文章评论、嵌套回复以及评论的 Emoji 反应关系，用于描述用户围绕文章
@@ -16,6 +17,7 @@ from blog.models import Article
 # Create your models here.
 
 class Comment(models.Model):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """文章评论模型。
 
     author 指向评论用户，article 指向被评论文章，parent_comment 通过自关联

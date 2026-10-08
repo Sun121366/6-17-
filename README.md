@@ -4,7 +4,6 @@
 > **项目来源**：本项目基于开源项目 DjangoBlog 进行学习与二次实践，感谢原作者及开源社区的无私分享。  
 > **说明**：由于个人能力有限，项目中可能存在不足或疏漏，欢迎老师和同学指正。
 
-<!-- [TWL/唐文龙] TWL = 唐文龙，仅用于标识本人补充或修改的代码说明与功能注释。 -->
 ---
 
 ## 一、项目简介
@@ -145,6 +144,7 @@ COLLATE utf8mb4_unicode_ci;
 cd 'D:\软工大作业\6-17-\src'
 
 python -m venv .venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1
 
 python -m pip install --upgrade pip
@@ -172,11 +172,13 @@ python manage.py runserver
 
 ```powershell
 cd 'D:\软工大作业\6-17-\src\frontend'
-npm ci
-npm run dev
+npm.cmd ci
+npm.cmd run dev
 ```
 
 前端开发地址为 `http://127.0.0.1:5173/`。开发时请同时保持后端和前端两个终端运行，然后访问 `http://127.0.0.1:8000/`。
+
+> 如果 `npm` 报“禁止运行脚本”，可以改用 `npm.cmd`，或者在当前 PowerShell 执行：`Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`。
 
 > 如果只启动 Django、不启动 Vite，页面可能因为缺少前端样式而出现排版异常。
 

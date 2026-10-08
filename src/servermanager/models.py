@@ -1,4 +1,5 @@
 # [TWL/唐文龙] 本文件中 2026-10-07 新增的中文模型说明、配置说明与业务注释由唐文龙补充整理。
+# [TWL/唐文龙] 以下模块说明由本人补充。
 """服务器管理辅助模型。
 
 保存运维命令说明和邮件发送日志，供后台管理及问题排查使用。
@@ -9,6 +10,7 @@ from django.db import models
 
 # Create your models here.
 class commands(models.Model):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """运维命令说明模型。
 
     类名保持项目原有命名，避免改变既有迁移和数据库表名；记录命令标题、
@@ -29,6 +31,7 @@ class commands(models.Model):
 
 
 class EmailSendLog(models.Model):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """邮件发送日志模型。
 
     记录收件人、标题、正文和发送结果，用于追踪系统通知是否成功。

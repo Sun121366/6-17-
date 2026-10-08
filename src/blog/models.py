@@ -1,4 +1,5 @@
 # [TWL/唐文龙] 本文件中 2026-10-07 新增的中文模型说明、配置说明与业务注释由唐文龙补充整理。
+# [TWL/唐文龙] 以下模块说明由本人补充。
 """博客核心数据模型。
 
 本模块集中定义文章、分类、标签、友情链接、侧边栏和网站配置等模型。
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class LinkShowType(models.TextChoices):
+    # [TWL/唐文龙] 以下枚举说明由本人补充。
     """友情链接的展示位置枚举。"""
     I = ('i', _('index'))
     L = ('l', _('list'))
@@ -35,6 +37,7 @@ class LinkShowType(models.TextChoices):
 
 
 class BaseModel(models.Model):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """业务模型抽象基类。
 
     统一提供主键、创建时间和修改时间字段；该模型不会单独生成数据库表，
@@ -73,6 +76,7 @@ class BaseModel(models.Model):
 
 
 class Article(BaseModel):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """文章模型。
 
     保存文章或独立页面的正文、发布时间、状态、作者、分类、标签和浏览量。
@@ -211,6 +215,7 @@ class Article(BaseModel):
 
 
 class Category(BaseModel):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """文章分类模型。
 
     通过 parent_category 自关联形成树形分类；name 唯一，slug 用于生成
@@ -278,6 +283,7 @@ class Category(BaseModel):
 
 
 class Tag(BaseModel):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """文章标签模型。
 
     标签与文章是多对多关系，一个标签可以属于多篇文章，一篇文章可设置多个标签。
@@ -302,6 +308,7 @@ class Tag(BaseModel):
 
 
 class Links(models.Model):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """友情链接模型。
 
     保存链接名称、URL、排序、启用状态和展示位置；sequence 唯一，用于稳定排序。
@@ -330,6 +337,7 @@ class Links(models.Model):
 
 
 class SideBar(models.Model):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """侧边栏内容模型。
 
     保存自定义 HTML 内容的标题、正文、排序和启用状态，用于扩展页面侧边区域。
@@ -351,6 +359,7 @@ class SideBar(models.Model):
 
 
 class BlogSettings(models.Model):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """网站全局配置模型。
 
     保存站点名称、SEO、主题配色、备案信息、评论审核和全局页眉页脚配置。

@@ -1,5 +1,6 @@
 # [TWL/唐文龙] 本文件中 2026-10-07 新增的中文模型说明、配置说明与业务注释由唐文龙补充整理。
 # Create your models here.
+# [TWL/唐文龙] 以下模块说明由本人补充。
 """第三方登录相关模型。
 
 OAuthUser 保存第三方平台返回的用户身份，并可绑定到站内 BlogUser；
@@ -14,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class OAuthUser(models.Model):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """第三方用户映射模型。
 
     author 为空时表示第三方身份尚未绑定站内账号；绑定后一个站内用户可以
@@ -46,6 +48,7 @@ class OAuthUser(models.Model):
 
 
 class OAuthConfig(models.Model):
+    # [TWL/唐文龙] 以下模型说明由本人补充。
     """OAuth 平台配置模型。
 
     保存平台类型、AppKey、AppSecret 和回调地址；同一平台只允许存在一条配置。
