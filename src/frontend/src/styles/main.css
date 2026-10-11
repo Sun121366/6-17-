@@ -2133,6 +2133,7 @@ body[data-color-scheme="teal"] {
   }
 
   /* ========== 侧边栏热门文章 ========== */
+  /* [TWL/唐文龙] sidebar.html 已接入以下类名，修改布局时请同步检查模板。 */
   .sidebar-hot-articles {
     @apply space-y-2;
   }
@@ -2301,6 +2302,7 @@ body[data-color-scheme="teal"] {
   }
 
   /* ========== 侧边栏标签云多彩设计 ========== */
+  /* [TWL/唐文龙] sidebar.html 使用 sidebar-tagcloud 与 sidebar-tag 呈现彩色标签。 */
   .sidebar-tagcloud {
     @apply flex flex-wrap gap-1.5;
   }

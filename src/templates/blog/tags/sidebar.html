@@ -28,13 +28,14 @@
             </svg>
             热门文章
         </h3>
-        <ul class="m-0 flex flex-col gap-3 p-0 list-none">
+        {# [TWL/唐文龙] 接入 main.css 中已有的热门文章样式，前三名自动使用金银铜配色。 #}
+        <ul class="sidebar-hot-articles m-0 list-none p-0">
             {% for a in most_read_articles %}
-                <li class="flex gap-3">
-                    <span class="flex size-5 shrink-0 items-center justify-center rounded text-[11px] font-semibold {% if forloop.counter <= 3 %}text-primary{% else %}text-muted-foreground{% endif %}">
+                <li class="hot-article-item">
+                    <span class="hot-article-rank {% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% endif %}">
                         {{ forloop.counter }}
                     </span>
-                    <a href="{{ a.get_absolute_url }}" class="group flex min-w-0 flex-col gap-1">
+                    <a href="{{ a.get_absolute_url }}" class="group flex min-w-0 flex-1 flex-col gap-1">
                         <span class="line-clamp-2 text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
                             {{ a.title }}
                         </span>
@@ -92,13 +93,11 @@
             </svg>
             {% trans 'Tag Cloud' %}
         </h3>
-        <div class="flex flex-wrap gap-1.5">
+        {# [TWL/唐文龙] 使用已有多彩标签云样式，保留文章数量作为权重提示。 #}
+        <div class="sidebar-tagcloud">
             {% for tag, count, size in sidebar_tags %}
                 <a href="{{ tag.get_absolute_url }}"
-                   class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary
-                   {% if size >= 18 %}border-primary/30 bg-primary/8 text-foreground text-sm font-semibold
-                   {% elif size >= 13 %}border-border text-foreground text-sm
-                   {% else %}border-border/60 text-muted-foreground text-xs{% endif %}">
+                   class="sidebar-tag {% if size >= 18 %}text-sm font-semibold{% elif size >= 13 %}text-sm{% endif %}">
                     {{ tag.name }}
                     <span class="tabular-nums opacity-50 text-[10px]">{{ count }}</span>
                 </a>

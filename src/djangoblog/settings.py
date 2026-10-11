@@ -1,3 +1,4 @@
+# [TWL/唐文龙] 本文件中 2026-10-07 新增的中文模型说明、配置说明与业务注释由唐文龙补充整理。
 """
 Django settings for djangoblog project.
 
@@ -42,8 +43,8 @@ CSRF_TRUSTED_ORIGINS = ['http://example.com']
 # Application definition
 
 
-# Django 应用注册表：内置组件负责认证、会话、后台和静态资源，
-# 业务应用负责博客、账号、评论、第三方登录和服务器管理。
+# Django 应用注册表：内置组件负责认证、会话、后台和静态资源， [TWL]
+# 业务应用负责博客、账号、评论、第三方登录和服务器管理。 [TWL]
 INSTALLED_APPS = [
     # 'django.contrib.admin',
     'django.contrib.admin.apps.SimpleAdminConfig',
@@ -65,8 +66,8 @@ INSTALLED_APPS = [
     'djangoblog'
 ]
 
-# 中间件按顺序拦截请求和响应，负责安全、会话、语言、压缩、CSRF、
-# 认证、消息、X-Frame 防护和博客在线状态统计。
+# 中间件按顺序拦截请求和响应，负责安全、会话、语言、压缩、CSRF、 [TWL]
+# 认证、消息、X-Frame 防护和博客在线状态统计。 [TWL]
 MIDDLEWARE = [
 
     'django.middleware.security.SecurityMiddleware',
@@ -84,7 +85,7 @@ MIDDLEWARE = [
     'blog.middleware.OnlineMiddleware'
 ]
 
-# 根 URL 配置入口，后续由 djangoblog.urls 分发到各业务应用。
+# 根 URL 配置入口，后续由 djangoblog.urls 分发到各业务应用。 [TWL]
 ROOT_URLCONF = 'djangoblog.urls'
 
 TEMPLATES = [
@@ -104,14 +105,14 @@ TEMPLATES = [
     },
 ]
 
-# WSGI 入口用于生产服务器调用 Django 应用。
+# WSGI 入口用于生产服务器调用 Django 应用。 [TWL]
 WSGI_APPLICATION = 'djangoblog.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 
-# 默认数据库为 MySQL；密码和地址优先从环境变量读取。
+# 默认数据库为 MySQL；密码和地址优先从环境变量读取。 [TWL]
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -262,7 +263,7 @@ HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 AUTHENTICATION_BACKENDS = [
     'accounts.user_login_backend.EmailOrUsernameModelBackend']
 
-# 静态资源与上传文件的根目录、URL 前缀。
+# 静态资源与上传文件的根目录、URL 前缀。 [TWL]
 STATIC_ROOT = os.path.join(BASE_DIR, 'collectedstatic')
 
 STATIC_URL = '/static/'
@@ -276,7 +277,7 @@ STATICFILES_DIRS = [
 # Vite开发服务器URL（开发模式）
 VITE_DEV_SERVER_URL = 'http://localhost:5173'
 
-# 指定自定义用户模型，Article、Comment 等外键统一关联 accounts.BlogUser。
+# 指定自定义用户模型，Article、Comment 等外键统一关联 accounts.BlogUser。 [TWL]
 AUTH_USER_MODEL = 'accounts.BlogUser'
 LOGIN_URL = '/login/'
 
