@@ -47,7 +47,7 @@
 ### 2.1 为什么选择 comments 应用
 
 - 评论是博客系统最核心的互动功能，业务链路完整：**提交 → 审核 → 展示 → 嵌套回复 → Emoji 反应 → 邮件通知**；
-- 代码量适中（基线 1710 行、13 个 Python 文件），适合逐行精读；
+- 代码量适中（基线 1538 行、13 个 Python 文件，均不含 migrations），适合逐行精读；
 - 兼具 **模型 / 视图 / 表单 / 模板标签 / 后台管理 / 工具函数** 六类典型文件，问题样本覆盖面广；
 - 该模块此前存在明显的性能与健壮性隐患（N+1 查询、异常直接抛出等），改进空间明确。
 
@@ -96,9 +96,9 @@
 
 | 指标 | 改进前 | 说明 |
 | --- | --- | --- |
-| 代码规模（radon raw） | LOC 1710 / LLOC 700 / SLOC 1235 | 不含 migrations |
-| 注释率 | C % L = 5%，C+M % L = 8% | 单行注释与多行文档字符串占比偏低 |
-| 圈复杂度 | 平均 **A（1.57）**，共 90 个代码块 | 复杂度本身健康，无 D/E/F 级块 |
+| 代码规模（radon raw） | LOC 1538 / LLOC 667 / SLOC 1094 | 均不含 migrations 自动生成代码 |
+| 注释率 | C % L = 6%，C+M % L = 9% | 单行注释与多行文档字符串占比偏低 |
+| 圈复杂度 | 平均 **A（1.60）**，共 85 个代码块 | 复杂度本身健康，无 D/E/F 级块 |
 | 可维护性指数 MI | 全部 **A**，最低 `admin.py` 48.24、`test_comment_business_logic.py` 49.52、`utils.py` 62.74 | A 级但仍偏低 |
 | pylint 评分 | **8.72 / 10** | 共 **72 条**告警 |
 | pycodestyle | **2 处**（W291 行尾空格，`utils.py:26`、`utils.py:28`） | — |
@@ -254,7 +254,7 @@ except Exception as e:
 
 ### 6.5 【中】注释率与文档字符串严重缺失
 
-基线 25 处 docstring 缺失、注释率仅 5%。按任务要求，本次为 `comments` 应用补齐**三层注释**：
+基线 25 处 docstring 缺失、注释率仅 6%。按任务要求，本次为 `comments` 应用补齐**三层注释**：
 
 1. **模块级注释**：每个文件顶部用 `# szj:` 说明模块职责与精读要点，并配模块 docstring；
 2. **类/函数/方法级**：所有 22 个类、79 个函数/方法 100% 补中文 docstring（含参数、返回值说明）；
@@ -306,12 +306,12 @@ except Exception as e:
 | pylint 评分 | 8.72 / 10 | **10.00 / 10** | ↑ 1.28 |
 | pylint 告警数 | 72 条 | **0 条** | ↓ 72 |
 | pycodestyle 问题 | 2 处 | **0 处** | ↓ 2 |
-| 圈复杂度（平均） | A（1.57），90 块 | **A（1.53）**，102 块 | 保持 A 级 |
+| 圈复杂度（平均） | A（1.60），85 块 | **A（1.56）**，97 块 | 保持 A 级 |
 | 可维护性 MI（最低模块） | `admin.py` 48.24 | `admin.py` **100.00** | ↑ 51.76 |
 | 可维护性 MI（`utils.py`） | 62.74 | **91.12** | ↑ 28.38 |
 | 可维护性 MI（`views.py`） | 68.26 | **74.21** | ↑ 5.95 |
-| 注释行 | 91 行（C % L = 5%） | **180 行（C % L = 9%）** | 注释率接近翻倍 |
-| 注释+文档字符串占比 | 8% | **14%** | ↑ 6 个百分点 |
+| 注释行 | 86 行（C % L = 6%） | **175 行（C % L = 9%）** | 注释率明显提升 |
+| 注释+文档字符串占比 | 9% | **15%** | ↑ 6 个百分点 |
 | 模块 docstring 覆盖 | 部分缺失 | **13 / 13（100%）** | 全覆盖 |
 | 类 docstring 覆盖 | 5 处缺失 | **22 / 22（100%）** | 全覆盖 |
 | 函数/方法 docstring 覆盖 | 12 处缺失 | **79 / 79（100%）** | 全覆盖 |
@@ -328,7 +328,7 @@ python manage.py check                          → System check identified no i
 python manage.py test comments --noinput        → Ran 42 tests ... OK
 python -m pylint comments ...                   → Your code has been rated at 10.00/10
 python -m pycodestyle comments --max-line-length=120 → 0 处问题
-python -m radon cc comments -a                  → Average complexity: A (1.53)
+python -m radon cc comments -a -e '*migrations*'  → Average complexity: A (1.56)
 ```
 
 > 说明：测试环境为本地 MySQL 8 + Django 5.2.17；测试过程中日志中出现的 `CacheKeyWarning`（memcached 缓存键字符）为项目既有告警，不影响测试结果，已纳入下一步优化计划。
@@ -368,7 +368,7 @@ python -m radon cc comments -a                  → Average complexity: A (1.53)
 ## 十、结论
 
 1. **基线结论**：`comments` 应用功能完整、圈复杂度健康（平均 A 级），但存在**注释/docstring 缺失、函数内导入、格式化不规范**等可维护性问题，并存在 **1 处 N+1 性能缺陷、1 处会导致 500 的异常处理缺陷、1 处反应接口测试空白**等实际风险。
-2. **改进结论**：本次共修复/优化 22 类问题，pylint 评分由 **8.72 提升至 10.00**，pycodestyle 归零，注释率接近翻倍，docstring 覆盖率达到 **100%**，并新增 6 个测试用例，**42/42 全部通过**，无功能回归。
+2. **改进结论**：本次共修复/优化 22 类代码问题（另发现 1 项数据库层隐患并列入下一步计划），pylint 评分由 **8.72 提升至 10.00**，pycodestyle 归零，注释率明显提升，docstring 覆盖率达到 **100%**，并新增 6 个测试用例，**42/42 全部通过**，无功能回归。
 3. **方法结论**：以"工具量化 → 定位问题 → 逐项改进 → 复测验证 → 回归测试"的闭环流程开展质量改进，方法可复制到其余应用，为小组下一步系统优化提供了可执行的模板。
 4. **额外发现**：分析过程中还定位到一个数据库层隐患——真实库排序规则 `utf8mb4_unicode_ci` 会让部分补充平面 Emoji 被唯一约束误判为重复（实测 `🎉` 触发 IntegrityError 1062），已列入下一步优化计划；该问题不由本次代码引入，不影响本次改进结论。
 
@@ -387,9 +387,9 @@ python -m pylint comments --load-plugins=pylint_django `
 python -m pycodestyle comments --max-line-length=120 --statistics --exclude=migrations
 
 # 复杂度与可维护性
-python -m radon cc comments -s -a
-python -m radon mi comments -s
-python -m radon raw comments -s
+python -m radon cc comments -s -a -e '*migrations*'
+python -m radon mi comments -s -e '*migrations*'
+python -m radon raw comments -s -e '*migrations*'
 
 # 框架检查与测试
 python manage.py check
