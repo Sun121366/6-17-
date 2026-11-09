@@ -1,8 +1,10 @@
-"""
-Test cases for comment business logic
+# szj: ===== comments 应用 · 业务逻辑单元测试（第 7-8 周大作业精读与注释：孙子杰）=====
+# szj: 本文件按“创建 → 审核 → 嵌套回复 → 权限 → 级联删除”组织用例，
+# szj: 本次质量改进：清理未使用的导入与变量（pylint W0611/W0612），并补充模块说明。
+"""Test cases for comment business logic
 包括评论审核工作流、嵌套回复、权限控制等核心业务逻辑
 """
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.utils import timezone
 
 from accounts.models import BlogUser
@@ -672,9 +674,9 @@ class CommentDeletionTest(TestCase):
             parent_comment=parent,
             is_enable=True
         )
+        self.assertIsNotNone(reply.id)  # szj: 确保回复成功落库，同时让变量被使用。
 
         parent_id = parent.id
-        reply_id = reply.id
 
         # 删除父评论
         parent.delete()
