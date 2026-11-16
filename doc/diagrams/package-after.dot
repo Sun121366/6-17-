@@ -1,0 +1,44 @@
+digraph package_after {
+  rankdir=TB;
+  graph [fontname="PingFang SC", fontsize=12, nodesep=0.5, ranksep=0.75, bgcolor="white", pad=0.7];
+  node [fontname="PingFang SC", fontsize=11, shape=folder, style="filled", fillcolor="#F1F5F9", color="#64748B"];
+  edge [color="#64748B", arrowsize=0.7];
+
+  /* 图例 */
+  subgraph cluster_legend {
+    label="图例"; fontsize=11; color="#CBD5E1"; style="rounded,dashed";
+    lg_mod [label="本次修改的包", fillcolor="#FEE2E2", color="#DC2626", fontsize=10];
+    lg_new [label="本次新增的包", fillcolor="#DCFCE7", color="#16A34A", fontsize=10];
+    lg_old [label="未改动的包", fillcolor="#F1F5F9", color="#64748B", fontsize=10];
+  }
+
+  djangoblog [label="djangoblog\n（配置 / URL / 插件机制）", fillcolor="#E0E7FF", color="#4F46E5"];
+  accounts [label="accounts\n（用户与登录）"];
+  blog [label="blog\n（文章 / 分类 / 标签 / 设置）"];
+  comments [label="comments\n（评论与回复）"];
+  oauth [label="oauth\n（第三方登录）"];
+
+  servermanager [label="servermanager  ✚修改\n（运维助手页面 / 命令校验 / AI 接入）",
+    fillcolor="#FEE2E2", color="#DC2626", penwidth=2];
+
+  subgraph cluster_plugins {
+    label="plugins（插件集合）"; fontsize=11; style="rounded"; color="#64748B"; bgcolor="#FAFAFA";
+    article_toc [label="article_toc  ✚新增\n（文章目录）", fillcolor="#DCFCE7", color="#16A34A", penwidth=2];
+    others [label="reading_time / view_count /\nseo_optimizer 等 8 个既有插件"];
+  }
+
+  djangoblog -> accounts;
+  djangoblog -> blog;
+  djangoblog -> comments;
+  djangoblog -> oauth;
+  djangoblog -> servermanager [penwidth=2, color="#DC2626"];
+  djangoblog -> others [penwidth=2, color="#16A34A", label="加载 ACTIVE_PLUGINS", lhead=cluster_plugins];
+
+  blog -> accounts;
+  comments -> blog;
+  comments -> accounts;
+  oauth -> accounts;
+  servermanager -> blog [penwidth=2, color="#DC2626"];
+  others -> blog [label="正文钩子"];
+  article_toc -> blog [label="the_content 钩子", color="#16A34A", penwidth=2, style=dashed];
+}

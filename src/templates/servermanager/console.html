@@ -1,0 +1,117 @@
+{% extends 'share_layout/base.html' %}
+{% load i18n %}
+
+{% block header %}
+    <title>运维助手 | {{ SITE_NAME }}</title>
+    <meta name="robots" content="noindex, nofollow"/>
+{% endblock %}
+
+{% block content %}
+    <div class="mx-auto max-w-6xl px-4 py-4 lg:px-6 lg:py-6">
+        <div class="grid gap-6 lg:grid-cols-[1fr_300px]">
+            <main>
+                <div class="mb-6">
+                    <h1 class="text-xl font-bold text-foreground m-0">运维助手</h1>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        共 {{ command_count }} 条已登记命令，直接执行的命令须在允许列表内。
+                    </p>
+                </div>
+
+                {% if error_message %}
+                    <div class="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+
+                {# 区块一：执行已登记命令 #}
+                <section class="mb-6 rounded-xl border border-border bg-card p-4">
+                    <h2 class="mb-3 text-base font-semibold text-foreground">执行已登记命令</h2>
+                    <form method="post" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="registered"/>
+                        <div class="flex-1">
+                            <label class="mb-1 block text-sm text-muted-foreground" for="{{ registered_form.title.id_for_label }}">
+                                {{ registered_form.title.label }}
+                            </label>
+                            {{ registered_form.title }}
+                        </div>
+                        <button type="submit"
+                                class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90">
+                            执行
+                        </button>
+                    </form>
+                    {% if command_count == 0 %}
+                        <p class="mt-2 text-xs text-muted-foreground">
+                            命令表为空，可先在后台"命令"中登记。
+                        </p>
+                    {% endif %}
+                </section>
+
+                {# 区块二：直接执行命令 #}
+                <section class="mb-6 rounded-xl border border-border bg-card p-4">
+                    <h2 class="mb-3 text-base font-semibold text-foreground">直接执行命令</h2>
+                    <form method="post" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="free"/>
+                        <div class="flex-1">
+                            <label class="mb-1 block text-sm text-muted-foreground" for="{{ free_form.command.id_for_label }}">
+                                {{ free_form.command.label }}
+                            </label>
+                            {{ free_form.command }}
+                        </div>
+                        <button type="submit"
+                                class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90">
+                            执行
+                        </button>
+                    </form>
+                    <p class="mt-2 text-xs text-muted-foreground">
+                        允许的命令：{% for name in whitelist %}<code class="mr-1">{{ name }}</code>{% endfor %}
+                    </p>
+                </section>
+
+                {# 区块三：AI 问答 #}
+                <section class="mb-6 rounded-xl border border-border bg-card p-4">
+                    <h2 class="mb-3 text-base font-semibold text-foreground">AI 问答</h2>
+                    <form method="post" class="flex flex-col gap-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="chat"/>
+                        {{ chat_form.prompt }}
+                        <div>
+                            <button type="submit"
+                                    class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90">
+                                提问
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                {# 结果展示 #}
+                {% if command_result %}
+                    <section class="rounded-xl border border-border bg-card p-4">
+                        <h2 class="mb-2 text-base font-semibold text-foreground">执行结果</h2>
+                        <p class="mb-2 text-xs text-muted-foreground">{{ result_source }}</p>
+                        <pre class="overflow-x-auto rounded-lg bg-muted px-3 py-2 text-xs text-foreground">{{ command_result }}</pre>
+                    </section>
+                {% endif %}
+
+                {% if chat_answer %}
+                    <section class="mt-4 rounded-xl border border-border bg-card p-4">
+                        <h2 class="mb-2 text-base font-semibold text-foreground">AI 回答</h2>
+                        <div class="whitespace-pre-wrap text-sm text-foreground">{{ chat_answer }}</div>
+                    </section>
+                {% endif %}
+            </main>
+
+            <div class="hidden lg:block">
+                <div class="sticky top-20">
+                    <div class="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+                        <p class="mb-2 font-medium text-foreground">使用说明</p>
+                        <p class="mb-2">命令执行与 AI 问答仅对管理员开放。</p>
+                        <p class="mb-2">直接执行的命令按白名单校验，不在列表中的命令会被拒绝。</p>
+                        <p>AI 问答需要配置 OPENAI_API_KEY，接口地址与模型名可通过环境变量切换。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,46 @@
+digraph class_after {
+  rankdir=LR;
+  graph [fontname="PingFang SC", fontsize=12, nodesep=0.35, ranksep=1.0, bgcolor="white", pad=0.7];
+  node [fontname="PingFang SC", fontsize=10, shape=box, style="filled", fillcolor="#F8FAFC", color="#64748B"];
+  edge [color="#64748B", arrowsize=0.7, fontname="PingFang SC", fontsize=9];
+
+  subgraph cluster_legend {
+    label="图例"; fontsize=11; color="#CBD5E1"; style="rounded,dashed";
+    lg_mod [label="修改的类", fillcolor="#FEE2E2", color="#DC2626", fontsize=10];
+    lg_new [label="新增的类", fillcolor="#DCFCE7", color="#16A34A", fontsize=10];
+  }
+
+  /* 既有类（未改动） */
+  commands [label="«model» commands\ntitle : CharField\ncommand : CharField\ndescribe : TextField"];
+  robot [label="robot.py（模块）\nrobot : WeRoBot\nget_cmd_handler() : CommandHandler", fillcolor="#FEE2E2", color="#DC2626", penwidth=2];
+
+  /* servermanager 子系统：修改 */
+  CommandHandler [label="CommandHandler\n————————\n- _commands : dict | None\n- whitelist : tuple\n- timeout : int\n————————\n+ commands : dict\n+ refresh() : dict\n+ _find(title) : str | None\n+ run(title) : str\n+ _parse(command) : list | None\n+ execute(command) : str\n+ is_allowed(name) : bool\n+ get_help() : str", fillcolor="#FEE2E2", color="#DC2626", penwidth=2];
+
+  ChatGPT [label="ChatGPT\n————————\n- api_key : str\n- base_url : str\n- model : str\n- timeout : int\n- _client : OpenAI | None\n————————\n+ client : OpenAI\n+ is_configured() : bool\n+ ask(prompt) : str\n+ _extract_content(resp) : str\n+ chat(prompt) : str  «classmethod»", fillcolor="#FEE2E2", color="#DC2626", penwidth=2];
+
+  /* servermanager 子系统：新增 */
+  console_view [label="views.console(request)\n«login_required»\nstaff 校验 → 三分支处理\n渲染 console.html", fillcolor="#DCFCE7", color="#16A34A", penwidth=2];
+  ExistingCommandForm [label="ExistingCommandForm\n- title : ChoiceField", fillcolor="#DCFCE7", color="#16A34A"];
+  FreeCommandForm [label="FreeCommandForm\n- command : CharField\n+ clean_command()", fillcolor="#DCFCE7", color="#16A34A"];
+  ChatForm [label="ChatForm\n- prompt : CharField\n+ clean_prompt()", fillcolor="#DCFCE7", color="#16A34A"];
+
+  /* 插件：新增 */
+  ArticleTocPlugin [label="ArticleTocPlugin\n«BasePlugin»\n————————\n+ PLUGIN_NAME = '文章目录'\n+ PLUGIN_VERSION = '1.0.0'\n————————\n+ register_hooks()\n+ inject_toc(content, **kwargs) : str\n+ _inject(content) : str\n+ _next_anchor(state, used) : str\n+ _render_nav(headings) : str", fillcolor="#DCFCE7", color="#16A34A", penwidth=2];
+
+  BasePlugin [label="BasePlugin\n（插件基类，既有）"];
+  hooks [label="hooks\n（注册表，既有）\n+ register(name, cb)\n+ apply_filters(name, value, **kw)"];
+  BlogUser [label="BlogUser\n（用户模型，既有）\nis_staff : bool"];
+
+  console_view -> ExistingCommandForm;
+  console_view -> FreeCommandForm;
+  console_view -> ChatForm;
+  console_view -> CommandHandler [label="已登记命令"];
+  console_view -> ChatGPT [label="AI 问答"];
+  console_view -> BlogUser [label="权限判断"];
+  CommandHandler -> commands [label="惰性读取"];
+  CommandHandler -> ChatGPT [label="类级入口 chat()"];
+  robot -> CommandHandler [label="懒加载"];
+  ArticleTocPlugin -> BasePlugin;
+  ArticleTocPlugin -> hooks [label="register(ARTICLE_CONTENT_HOOK_NAME)"];
+}

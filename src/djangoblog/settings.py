@@ -468,5 +468,6 @@ ACTIVE_PLUGINS = [
     'image_lazy_loading',
     'article_recommendation',
     'cloudflare_cache',  # Cloudflare缓存管理插件
+    'article_toc',  # 文章目录插件（第9-10周新增）
 ]
 

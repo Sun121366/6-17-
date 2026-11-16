@@ -13,8 +13,8 @@ from servermanager.api.blogapi import BlogApi
 from servermanager.api.commonapi import ChatGPT, CommandHandler
 from .MemcacheStorage import MemcacheStorage
 
-robot = WeRoBot(token=os.environ.get('DJANGO_WEROBOT_TOKEN')
-                      or 'lylinux', enable_session=True)
+robot = WeRoBot(token=os.environ.get('DJANGO_WEROBOT_TOKEN') or 'lylinux',
+                enable_session=True)
 memstorage = MemcacheStorage()
 if memstorage.is_available:
     robot.config['SESSION_STORAGE'] = memstorage
@@ -24,7 +24,21 @@ else:
     robot.config['SESSION_STORAGE'] = FileStorage(filename='werobot_session')
 
 blogapi = BlogApi()
-cmd_handler = CommandHandler()
+
+# cgw: 命令处理器改为惰性创建。原实现在模块级直接构造 CommandHandler，
+# 其构造过程会立即查询 commands 表，导致导入期访问数据库，在迁移前或
+# 数据库不可用时阻断整个应用加载。
+_cmd_handler = None
+
+
+def get_cmd_handler():
+    """获取命令处理器单例，首次调用时才读取命令表。"""
+    global _cmd_handler
+    if _cmd_handler is None:
+        _cmd_handler = CommandHandler()
+    return _cmd_handler
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -168,10 +182,10 @@ class MessageHandler:
                 return "验证失败，请重新输入管理员密码:"
         if self.userinfo.isAdmin and self.userinfo.isPasswordSet:
             if self.userinfo.Command != '' and info.upper() == 'Y':
-                return cmd_handler.run(self.userinfo.Command)
+                return get_cmd_handler().run(self.userinfo.Command)
             else:
                 if info.upper() == 'HELPME':
-                    return cmd_handler.get_help()
+                    return get_cmd_handler().get_help()
                 self.userinfo.Command = info
                 self.save_session()
                 return "确认执行: " + info + " 命令?"

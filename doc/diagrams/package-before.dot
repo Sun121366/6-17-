@@ -1,0 +1,28 @@
+digraph package_before {
+  rankdir=TB;
+  graph [fontname="PingFang SC", fontsize=12, nodesep=0.5, ranksep=0.7, bgcolor="white", pad=0.3];
+  node [fontname="PingFang SC", fontsize=11, shape=folder, style="filled", fillcolor="#F1F5F9", color="#64748B"];
+  edge [color="#64748B", arrowsize=0.7];
+
+  djangoblog [label="djangoblog\n（配置 / URL / 插件机制）", fillcolor="#E0E7FF", color="#4F46E5"];
+  accounts [label="accounts\n（用户与登录）"];
+  blog [label="blog\n（文章 / 分类 / 标签 / 设置）"];
+  comments [label="comments\n（评论与回复）"];
+  oauth [label="oauth\n（第三方登录）"];
+  servermanager [label="servermanager\n（公众号机器人与运维 API）"];
+  plugins [label="plugins\n（8 个可选插件）"];
+
+  djangoblog -> accounts;
+  djangoblog -> blog;
+  djangoblog -> comments;
+  djangoblog -> oauth;
+  djangoblog -> servermanager;
+  djangoblog -> plugins;
+
+  blog -> accounts [label="外键 author"];
+  comments -> blog [label="外键 article"];
+  comments -> accounts [label="外键 author"];
+  oauth -> accounts;
+  servermanager -> blog [label="读取文章 / 分类"];
+  plugins -> blog [label="钩子注入正文"];
+}

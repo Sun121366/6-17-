@@ -1,0 +1,56 @@
+digraph usecase {
+  rankdir=LR;
+  graph [fontname="PingFang SC", fontsize=12, nodesep=0.28, ranksep=1.5, bgcolor="white", pad=0.3];
+  node [fontname="PingFang SC", fontsize=11];
+  edge [fontname="PingFang SC", fontsize=10, color="#64748B", arrowsize=0.7];
+
+  visitor [shape=box, style="rounded,filled", fillcolor="#EEF2FF", color="#6366F1", label="访客"];
+  user [shape=box, style="rounded,filled", fillcolor="#EEF2FF", color="#6366F1", label="注册用户"];
+  admin [shape=box, style="rounded,filled", fillcolor="#EEF2FF", color="#6366F1", label="管理员"];
+
+  /* 访客用例 */
+  browse [label="浏览文章列表"];
+  detail [label="查看文章详情"];
+  bycat [label="按分类浏览"];
+  bytag [label="按标签浏览"];
+  search_ [label="搜索文章"];
+  archive [label="查看归档 / 友链"];
+
+  /* 注册用户用例 */
+  login [label="登录 / 注册"];
+  oauth [label="第三方 OAuth 登录"];
+  comment [label="发表评论"];
+  reply [label="回复评论"];
+  react [label="评论点赞 / 点踩"];
+
+  /* 管理员用例 */
+  article_mgr [label="管理文章与分类标签"];
+  comment_mgr [label="审核评论"];
+  site_cfg [label="站点参数配置"];
+  run_cmd [label="执行运维命令", style="filled", fillcolor="#FEF3C7", color="#D97706"];
+  ai_chat [label="AI 问答", style="filled", fillcolor="#FEF3C7", color="#D97706"];
+  toc [label="文章自动生成目录", style="filled", fillcolor="#DCFCE7", color="#16A34A"];
+
+  visitor -> browse;
+  visitor -> detail;
+  visitor -> bycat;
+  visitor -> bytag;
+  visitor -> search_;
+  visitor -> archive;
+
+  user -> login;
+  user -> oauth;
+  user -> comment;
+  user -> reply;
+  user -> react;
+
+  admin -> article_mgr;
+  admin -> comment_mgr;
+  admin -> site_cfg;
+  admin -> run_cmd;
+  admin -> ai_chat;
+
+  detail -> toc [style=dashed, arrowhead=none, color="#16A34A"];
+  run_cmd -> login [style=dashed, arrowhead=none, color="#94A3B8", label="«include»\n登录校验"];
+  ai_chat -> login [style=dashed, arrowhead=none, color="#94A3B8"];
+}

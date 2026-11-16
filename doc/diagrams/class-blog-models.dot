@@ -1,0 +1,42 @@
+digraph blog_models {
+  rankdir=LR;
+  graph [fontname="PingFang SC", fontsize=12, nodesep=0.32, ranksep=1.15, bgcolor="white", pad=0.4];
+  node [fontname="PingFang SC", fontsize=10, shape=box, style="filled", fillcolor="#F8FAFC", color="#64748B"];
+  edge [color="#64748B", arrowsize=0.7, fontname="PingFang SC", fontsize=9];
+
+  BaseModel [label="BaseModel «abstract»\n——————————\n+ id : AutoField\n+ creation_time : DateTime\n+ last_modify_time : DateTime\n——————————\n+ save()\n+ get_absolute_url()", fillcolor="#E0E7FF", color="#4F46E5"];
+
+  BlogUser [label="BlogUser\n——————————\n+ username : str\n+ nickname : str\n+ is_staff : bool\n+ source : str\n+ openid : str"];
+
+  Article [label="Article\n——————————\n+ title : CharField(200)\n+ body : TextField\n+ pub_time : DateTime\n+ status : CharField\n+ comment_status : CharField\n+ type : CharField\n+ views : PositiveInteger\n+ article_order : Integer\n+ show_toc : Boolean\n——————————\n+ body_to_string()\n+ viewed()", fillcolor="#FEF3C7", color="#D97706"];
+
+  Category [label="Category\n——————————\n+ name : CharField(30)\n+ slug : SlugField\n+ index : Integer\n——————————\n+ get_sub_categorys()"];
+  Tag [label="Tag\n——————————\n+ name : CharField(30)\n+ slug : SlugField"];
+
+  Comment [label="Comment\n——————————\n+ body : TextField(300)\n+ creation_time : DateTime\n+ last_modify_time : DateTime\n+ is_enable : Boolean"];
+  CommentReaction [label="CommentReaction\n——————————\n+ reaction_type : CharField"];
+
+  BlogSettings [label="BlogSettings\n——————————\n+ site_name / site_description\n+ beian_code / analytics_code"];
+  Links [label="Links\n——————————\n+ name / link / sequence"];
+  SideBar [label="SideBar\n——————————\n+ name / content_type\n+ sequence / is_enable"];
+  commands [label="«model» commands\n（servermanager 包）\n——————————\n+ title / command / describe", fillcolor="#FEE2E2", color="#DC2626"];
+
+  BaseModel -> Article [style=dashed, arrowhead=onormal, label="继承"];
+  BaseModel -> Category [style=dashed, arrowhead=onormal];
+  BaseModel -> Tag [style=dashed, arrowhead=onormal];
+
+  Article -> BlogUser [label="author  N:1"];
+  Article -> Category [label="category  N:1"];
+  Article -> Tag [label="tags  M:N", dir=both, arrowtail=odot];
+
+  Category -> Category [label="parent_category  1:N", constraint=false];
+
+  Comment -> Article [label="article  N:1"];
+  Comment -> BlogUser [label="author  N:1"];
+  Comment -> Comment [label="parent_comment  1:N", constraint=false];
+
+  CommentReaction -> Comment [label="comment  N:1"];
+  CommentReaction -> BlogUser [label="user  N:1"];
+
+  { rank=same; BlogSettings; Links; SideBar; commands; }
+}

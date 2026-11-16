@@ -247,3 +247,96 @@ class ExternalLinksPluginTest(BaseTestCase, PluginTestMixin):
         content = '<a href="https://example.com">外部链接</a>'
         # 测试插件已加载即可，具体处理逻辑在运行时应用
         self.assertIsNotNone(plugin.PLUGIN_NAME)
+
+
+class ArticleTocPluginTest(BaseTestCase, PluginTestMixin):
+    """测试文章目录插件（第9-10周新增）"""
+
+    SAMPLE = (
+        '<h2>第一节 背景</h2><p>内容</p>'
+        '<h3>1.1 现状</h3><p>内容</p>'
+        '<h2>第二节 方案</h2><p>内容</p>'
+    )
+
+    def _plugin(self):
+        from plugins.article_toc.plugin import ArticleTocPlugin
+        return ArticleTocPlugin()
+
+    def test_plugin_metadata(self):
+        """插件元信息符合约定"""
+        plugin = self._plugin()
+        self.assertEqual(plugin.PLUGIN_NAME, '文章目录')
+        self.assertEqual(plugin.PLUGIN_VERSION, '1.0.0')
+
+    def test_register_hooks(self):
+        """注册后钩子列表中出现目录方法"""
+        from djangoblog.plugin_manage import hooks
+        from djangoblog.plugin_manage.hook_constants import ARTICLE_CONTENT_HOOK_NAME
+
+        backup = {name: list(cbs) for name, cbs in hooks._hooks.items()}
+        try:
+            hooks._hooks = {}
+            self._plugin().register_hooks()
+            self.assertTrue(hooks._hooks.get(ARTICLE_CONTENT_HOOK_NAME))
+        finally:
+            hooks._hooks = backup
+
+    def test_toc_injected(self):
+        """目录插入正文开头且包含全部标题"""
+        result = self._plugin().inject_toc(self.SAMPLE)
+        self.assertTrue(result.startswith('<nav'))
+        self.assertIn('文章目录', result)
+        self.assertIn('第一节 背景', result)
+        self.assertIn('1.1 现状', result)
+        self.assertIn('第二节 方案', result)
+
+    def test_anchor_added(self):
+        """标题补齐锚点且目录链接指向同一锚点"""
+        result = self._plugin().inject_toc(self.SAMPLE)
+        for anchor in ('toc-1', 'toc-2', 'toc-3'):
+            self.assertIn('href="#%s"' % anchor, result)
+            self.assertIn('id="%s"' % anchor, result)
+
+    def test_summary_mode_skipped(self):
+        """列表页摘要不生成目录"""
+        self.assertEqual(self._plugin().inject_toc(self.SAMPLE, is_summary=True), self.SAMPLE)
+
+    def test_too_few_headings(self):
+        """标题数量不足时不渲染目录"""
+        content = '<h2>只有一个标题</h2><p>x</p>'
+        self.assertEqual(self._plugin().inject_toc(content), content)
+
+    def test_existing_id_kept(self):
+        """标题已有 id 时沿用，不重复生成"""
+        result = self._plugin().inject_toc('<h2 id="custom">甲</h2><h2>乙</h2>')
+        self.assertIn('href="#custom"', result)
+        self.assertIn('id="custom"', result)
+        self.assertIn('href="#toc-1"', result)
+
+    def test_level4_ignored(self):
+        """四级标题不进入目录"""
+        content = '<h2>二级</h2><h4>四级</h4><h2>另一个二级</h2>'
+        result = self._plugin().inject_toc(content)
+        self.assertNotIn('四级', result.split('</nav>')[0])
+
+    def test_empty_content(self):
+        """空正文原样返回"""
+        self.assertEqual(self._plugin().inject_toc(''), '')
+
+    def test_title_escaped_in_nav(self):
+        """标题中的标签被剥离，特殊字符被转义"""
+        result = self._plugin().inject_toc(
+            '<h2>a &lt;b&gt; c</h2><h2><script>alert(1)</script>d</h2>'
+        )
+        nav = result.split('</nav>')[0]
+        self.assertNotIn('<script>', nav)
+        # cgw: 标题原文中的实体被二次转义，页面上仍按原文展示
+        self.assertIn('&amp;lt;', nav)
+        self.assertIn('alert(1)', nav)
+
+    def test_exception_falls_back(self):
+        """处理异常时退回原文，不影响正文展示"""
+        plugin = self._plugin()
+        with patch.object(plugin, '_inject', side_effect=RuntimeError('boom')):
+            self.assertEqual(plugin.inject_toc(self.SAMPLE), self.SAMPLE)
+
