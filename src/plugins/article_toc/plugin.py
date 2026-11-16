@@ -3,6 +3,12 @@
 cgw: 第9-10周新增插件。解析正文中的二级、三级标题，为缺失锚点的标题补上
 id，并在正文开头插入目录；文章列表页的摘要不生成目录。标题数量过少时
 不渲染，避免短文章出现无意义的目录块。
+
+cgw: 与内置目录的分工。系统原本在 article_detail.html 里用 article.show_toc
+开关加 get_markdown_toc 模板标签渲染目录，但那个开关默认关闭、且每篇文章
+都要在后台手动勾选。本插件提供的是零配置版本：正文标题达到两个就自动生
+成，不需要逐篇开关；文章如果已经勾选了 show_toc，内置目录会先渲染出来，
+本插件立即让位，避免同一页出现两份目录。
 """
 
 import html
@@ -30,7 +36,8 @@ class ArticleTocPlugin(BasePlugin):
     """根据正文标题生成文章目录的插件。"""
 
     PLUGIN_NAME = '文章目录'
-    PLUGIN_DESCRIPTION = '根据正文中的二级、三级标题生成目录并插入正文开头。'
+    PLUGIN_DESCRIPTION = ('正文标题达到两个即自动生成目录，无需逐篇勾选；'
+                          '已由内置目录渲染的文章自动跳过。')
     PLUGIN_VERSION = '1.0.0'
     PLUGIN_AUTHOR = '程光文'
 
@@ -42,12 +49,17 @@ class ArticleTocPlugin(BasePlugin):
         """在正文前插入目录。
 
         :param content: 已渲染为 HTML 的正文
-        :param kwargs: 包含 ``is_summary``，列表页摘要模式直接跳过
+        :param kwargs: 包含 ``is_summary`` 与 ``article``，分别用于判断
+            列表页摘要模式、文章自身的目录开关
         :return: 插入目录后的正文
         """
         if not content:
             return content
         if kwargs.get('is_summary'):
+            return content
+        article = kwargs.get('article')
+        if article is not None and getattr(article, 'show_toc', False):
+            # cgw: 详情页模板已经用内置目录渲染过，这里再插一份会重复
             return content
         try:
             return self._inject(content)

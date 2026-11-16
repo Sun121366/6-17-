@@ -3,6 +3,7 @@
 测试插件加载、钩子注册和执行
 """
 import os
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from django.test import TestCase
@@ -301,6 +302,19 @@ class ArticleTocPluginTest(BaseTestCase, PluginTestMixin):
         """列表页摘要不生成目录"""
         self.assertEqual(self._plugin().inject_toc(self.SAMPLE, is_summary=True), self.SAMPLE)
 
+    def test_skipped_when_builtin_toc_enabled(self):
+        """文章已勾选 show_toc 时让位给内置目录"""
+        article = SimpleNamespace(show_toc=True)
+        self.assertEqual(
+            self._plugin().inject_toc(self.SAMPLE, article=article), self.SAMPLE)
+
+    def test_injected_when_builtin_toc_disabled(self):
+        """文章未勾选 show_toc 时由插件补上目录"""
+        article = SimpleNamespace(show_toc=False)
+        result = self._plugin().inject_toc(self.SAMPLE, article=article)
+        self.assertTrue(result.startswith('<nav'))
+        self.assertIn('文章目录', result)
+
     def test_too_few_headings(self):
         """标题数量不足时不渲染目录"""
         content = '<h2>只有一个标题</h2><p>x</p>'
@@ -339,4 +353,3 @@ class ArticleTocPluginTest(BaseTestCase, PluginTestMixin):
         plugin = self._plugin()
         with patch.object(plugin, '_inject', side_effect=RuntimeError('boom')):
             self.assertEqual(plugin.inject_toc(self.SAMPLE), self.SAMPLE)
-
